@@ -35,13 +35,14 @@ manifest="$tmp/archive/manifests/paper-file-sha256.tsv"
 skipped="$tmp/archive/manifests/paper-download-skipped.tsv"
 test -s "$manifest"
 test -s "$skipped"
+grep -Fq $'expected_checksum\tchecksum_type\tsha256' "$manifest"
 test "$(( $(wc -l < "$manifest") - 1 ))" -eq 1
 test "$(( $(wc -l < "$skipped") - 1 ))" -eq 2
-path=$(awk -F '\t' 'NR == 2 { print $10 }' "$manifest")
+path=$(awk -F '\t' 'NR == 2 { print $11 }' "$manifest")
 test -s "$path"
 test "$(stat -c %s "$path")" -eq 3
 expected=$(sha256sum "$tmp/source/a.bin" | awk '{ print $1 }')
-test "$(awk -F '\t' 'NR == 2 { print $9 }' "$manifest")" = "$expected"
+test "$(awk -F '\t' 'NR == 2 { print $10 }' "$manifest")" = "$expected"
 grep -Fq $'C\tPRJEB1\tPAUSED_SOURCE_GATE' "$skipped"
 grep -Fq $'D\t\tUNKNOWN_SIZE' "$skipped"
 

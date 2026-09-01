@@ -182,9 +182,9 @@ download_one() {
     [[ "$actual_md5" == "$expected_checksum" ]]
   fi
   downloaded_utc=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
     "$source" "$accession" "$repository" "$filename" "$url" "$expected_size" "$actual_size" \
-    "$expected_checksum" "$actual_sha" "$destination" "$status" "$downloaded_utc" > "$result"
+    "$expected_checksum" "$checksum_type" "$actual_sha" "$destination" "$status" "$downloaded_utc" > "$result"
 }
 
 active=0
@@ -204,7 +204,7 @@ while (( active > 0 )); do
 done
 (( failed == 0 )) || { echo "one or more downloads failed" >&2; exit 1; }
 
-printf 'source_record_id\taccession\trepository\tfile_name\tdownload_url\texpected_bytes\tactual_bytes\texpected_checksum\tsha256\tlocal_path\tstatus\tdownloaded_utc\n' \
+printf 'source_record_id\taccession\trepository\tfile_name\tdownload_url\texpected_bytes\tactual_bytes\texpected_checksum\tchecksum_type\tsha256\tlocal_path\tstatus\tdownloaded_utc\n' \
   > "$output_manifest.part"
 for result in "$rows_dir"/[0-9][0-9][0-9][0-9][0-9][0-9].tsv; do
   [[ -e "$result" ]] && cat "$result" >> "$output_manifest.part"
