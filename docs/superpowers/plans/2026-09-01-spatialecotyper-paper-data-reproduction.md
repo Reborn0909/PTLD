@@ -46,12 +46,12 @@
 - Produce: `/mnt/f/spatialecotyper_reproduction/archive/manifests/paper-samples.tsv`
 - Produce: `/mnt/f/spatialecotyper_reproduction/archive/manifests/paper-access-ledger.tsv`
 
-- [ ] **Step 1: 写失败测试**：要求完整读取 S1/S2/S8/S12/S15/S17，保留每行原始字段与 sheet/row provenance，校验 S1 有 48 个数据行、S2 有 18 个数据行、S8 有 42 个数据行。
-- [ ] **Step 2: 运行测试确认失败**：`python reproduction/spatialecotyper/tests/test_paper_data_manifest.py`。
-- [ ] **Step 3: 实现抽取与规范化**：统一 accession、portal、modality、platform、cancer type、reported sample count、publication URL；不得把同一 accession 的不同样本静默合并。
-- [ ] **Step 4: 标注访问层级**：`PUBLIC_DIRECT`、`PUBLIC_API`、`REGISTRATION_REQUIRED`、`CONTROLLED_DUA`、`NOT_PUBLIC`，并记录判定证据 URL。
-- [ ] **Step 5: 运行测试和人工审计**：生成逐 sheet 行数、唯一 accession 数、报告样本数总和与重复项报告。
-- [ ] **Step 6: 提交**：`git commit -m "data: derive canonical paper dataset manifest"`。
+- [x] **Step 1: 写失败测试**：要求完整读取 S1/S2/S8/S12/S15/S17，保留每行原始字段与 sheet/row provenance；校验 S1 有 18 个队列数据行（Excel 总 48 行）、S2 有 14 个队列数据行（Excel 总 18 行）、S8 有 31 个样本数据行（Excel 总 42 行）。
+- [x] **Step 2: 运行测试确认失败**：`python reproduction/spatialecotyper/tests/test_paper_data_manifest.py`。
+- [x] **Step 3: 实现抽取与规范化**：统一 accession、portal、modality、platform、cancer type、reported sample count、publication URL；不得把同一 accession 的不同样本静默合并。
+- [x] **Step 4: 标注访问层级**：生成待解析的 access ledger；具体层级由 Task 3 的仓库探测证据写回。
+- [x] **Step 5: 运行测试和人工审计**：生成逐 sheet 行数、唯一 accession 数、报告样本数总和与重复项报告。
+- [x] **Step 6: 提交**：`git commit -m "data: derive canonical paper dataset manifest"`。
 
 ### Task 3: 解析下载 URL、许可证与容量闸门
 
