@@ -77,11 +77,20 @@ audit_body() {
     --output docs/reproduction/spatialecotyper-paper-data-inventory.md
 
   file_validation="$data_root/results/reproducibility/paper-file-validation.tsv"
+  file_manifest="$data_root/archive/manifests/paper-file-sha256.tsv"
+  sample_availability="$data_root/results/reproducibility/paper-sample-availability.tsv"
   sample_comparison="$data_root/results/paper_reproduction/generated_visium_deconvolution/supplementary-table-s17-comparison.tsv"
   test -s "$file_validation"
+  test -s "$file_manifest"
+  test -s "$sample_availability"
   test -s "$sample_comparison"
+  test "$(( $(wc -l < "$file_validation") - 1 ))" \
+    -eq "$(( $(wc -l < "$file_manifest") - 1 ))"
   awk -F '\t' 'NR == 1 { for (i=1; i<=NF; i++) if ($i == "validation_status") c=i; next }
     $c != "PASS" { failed += 1 } END { if (!c || failed) exit 1 }' "$file_validation"
+  awk -F '\t' 'NR == 1 { for (i=1; i<=NF; i++) if ($i == "availability") c=i; next }
+    $c == "DOWNLOAD_PENDING" || $c == "PARTIAL" { failed += 1 }
+    END { if (!c || failed) exit 1 }' "$sample_availability"
   awk -F '\t' 'NR == 1 { for (i=1; i<=NF; i++) if ($i == "comparison_status") c=i; next }
     $c != "PASS" { failed += 1 } END { if (!c || NR != 18 || failed) exit 1 }' "$sample_comparison"
   pass "paper file integrity and Supplementary Table 17 sample counts"
