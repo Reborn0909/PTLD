@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 import importlib.util
 import json
+from http.client import RemoteDisconnected
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 
 REPO = Path(__file__).resolve().parents[3]
@@ -20,6 +22,32 @@ def load_module():
 
 
 class PaperDownloadResolutionTest(unittest.TestCase):
+    def test_http_bytes_retries_remote_disconnect(self):
+        module = load_module()
+
+        class Response:
+            headers = {}
+            status = 200
+
+            def read(self):
+                return b"ok"
+
+            def geturl(self):
+                return "https://example.org/final"
+
+        with patch.object(
+            module,
+            "urlopen",
+            side_effect=[RemoteDisconnected("transient"), Response()],
+        ) as mocked:
+            payload, _, status, final_url = module.http_bytes(
+                "https://example.org/data", attempts=2
+            )
+        self.assertEqual(b"ok", payload)
+        self.assertEqual(200, status)
+        self.assertEqual("https://example.org/final", final_url)
+        self.assertEqual(2, mocked.call_count)
+
     def test_geo_index_parser_returns_only_files(self):
         module = load_module()
         html = '''<a href="../">Parent</a>

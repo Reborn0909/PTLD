@@ -41,7 +41,7 @@ def http_bytes(url: str, method: str = "GET", headers=None, attempts: int = 5, t
         try:
             response = urlopen(Request(url, headers=request_headers, method=method), timeout=timeout)
             return response.read(), response.headers, getattr(response, "status", 200), response.geturl()
-        except (HTTPError, URLError, TimeoutError) as error:
+        except (HTTPError, URLError, TimeoutError, ConnectionError) as error:
             last_error = error
             if isinstance(error, HTTPError) and error.code not in {429, 500, 502, 503, 504}:
                 raise
@@ -142,7 +142,7 @@ def http_metadata(url: str, method: str = "HEAD", headers=None, attempts: int = 
             final_url = response.geturl()
             response.close()
             return metadata, status, final_url
-        except (HTTPError, URLError, TimeoutError) as error:
+        except (HTTPError, URLError, TimeoutError, ConnectionError) as error:
             last_error = error
             if isinstance(error, HTTPError) and error.code not in {429, 500, 502, 503, 504}:
                 raise
