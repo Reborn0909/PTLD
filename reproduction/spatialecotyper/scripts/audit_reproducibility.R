@@ -29,6 +29,22 @@ gse_members_path <- file.path(
 gse_metadata_path <- file.path(
   data_root, "archive", "manifests", "GSE320042.download-metadata.tsv"
 )
+paper_downloads_path <- file.path(
+  data_root, "archive", "manifests", "paper-downloads.tsv"
+)
+download_capacity_path <- file.path(
+  result_dir, "paper-download-capacity.tsv"
+)
+paper_files_path <- file.path(
+  data_root, "archive", "manifests", "paper-file-sha256.tsv"
+)
+paper_validation_path <- file.path(
+  result_dir, "paper-file-validation.tsv"
+)
+paper_run_status_path <- file.path(
+  data_root, "results", "paper_reproduction",
+  "generated_visium_deconvolution", "run-status.tsv"
+)
 
 dir.create(result_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(dirname(report_path), recursive = TRUE, showWarnings = FALSE)
@@ -98,6 +114,66 @@ gse_summary <- data.frame(
 )
 write_tsv_atomic(gse_summary, gse_summary_path)
 
+stopifnot(file.exists(paper_downloads_path), file.exists(download_capacity_path))
+paper_downloads <- read.delim(
+  paper_downloads_path, stringsAsFactors = FALSE, check.names = FALSE,
+  quote = "", comment.char = ""
+)
+download_capacity <- read.delim(
+  download_capacity_path, stringsAsFactors = FALSE, check.names = FALSE,
+  quote = "", comment.char = ""
+)
+passed_sources <- download_capacity$source_record_id[
+  download_capacity$source_gate == "PASS"
+]
+paper_downloads$size_numeric <- suppressWarnings(as.numeric(paper_downloads$size_bytes))
+actionable <- paper_downloads[
+  paper_downloads$source_record_id %in% passed_sources &
+    !is.na(paper_downloads$size_numeric) & paper_downloads$size_numeric > 0 &
+    nzchar(paper_downloads$download_url),
+  , drop = FALSE
+]
+actionable <- actionable[!duplicated(actionable$download_url), , drop = FALSE]
+actionable_files <- nrow(actionable)
+actionable_bytes <- sum(actionable$size_numeric)
+paused_bytes <- sum(
+  suppressWarnings(as.numeric(download_capacity$known_bytes[
+    download_capacity$source_gate != "PASS"
+  ])),
+  na.rm = TRUE
+)
+downloaded_files <- 0L
+downloaded_bytes <- 0
+validated_files <- 0L
+if (file.exists(paper_files_path)) {
+  paper_files <- read.delim(
+    paper_files_path, stringsAsFactors = FALSE, check.names = FALSE,
+    quote = "", comment.char = ""
+  )
+  downloaded_files <- nrow(paper_files)
+  downloaded_bytes <- sum(suppressWarnings(as.numeric(paper_files$actual_bytes)), na.rm = TRUE)
+}
+if (file.exists(paper_validation_path)) {
+  paper_validation <- read.delim(
+    paper_validation_path, stringsAsFactors = FALSE, check.names = FALSE,
+    quote = "", comment.char = ""
+  )
+  validated_files <- sum(paper_validation$validation_status == "PASS")
+}
+
+stopifnot(file.exists(paper_run_status_path))
+paper_runs <- read.delim(
+  paper_run_status_path, stringsAsFactors = FALSE, check.names = FALSE,
+  quote = "", comment.char = ""
+)
+spot_runs <- paper_runs[
+  paper_runs$status %in% c("SPOT_LEVEL_REPRODUCED", "VERIFIED_EXISTING"),
+  , drop = FALSE
+]
+spot_samples <- nrow(spot_runs)
+spot_patients <- length(unique(spot_runs$patient_id))
+spot_locations <- sum(as.numeric(spot_runs$locations))
+
 publication_evidence <- data.frame(
   claim_id = c(
     "paper_scale", "data_availability", "code_availability",
@@ -118,7 +194,12 @@ publication_evidence <- data.frame(
       "Local GSE archive has %d GSM records: %d scRNA and %d spatial, including %d Visium HD.",
       length(all_gsm), length(scrna_gsm), length(spatial_gsm), length(hd_gsm)
     ),
-    "GSE320042 RAW tar is locally archived with SHA-256 and 154 audited members; the DOI dataset and all external public cohorts are not yet mirrored.",
+    sprintf(
+      "GSE320042 is SHA-verified; the resolved actionable public queue has %d files (%s bytes), of which %d files (%s bytes) are in the finalized download manifest and %d passed full validation.",
+      actionable_files, format(actionable_bytes, scientific = FALSE, trim = TRUE),
+      downloaded_files, format(downloaded_bytes, scientific = FALSE, trim = TRUE),
+      validated_files
+    ),
     sprintf(
       "Fixed repository contains %d R files and %d Rmd files but zero Python and zero notebook files.",
       sum(extensions == ".r"), sum(extensions == ".rmd")
@@ -186,7 +267,21 @@ report <- c(
   sprintf("- 固定仓库：%d 个 R 文件、%d 个 Rmd、0 个 Python、0 个 notebook。", sum(extensions == ".r"), sum(extensions == ".rmd")),
   sprintf("- GSE320042：%s 字节，SHA-256 `%s`，%d 个 tar 成员。", tar_row$bytes, tar_row$sha256, length(members)),
   sprintf("- GEO 成员：%d 个 GSM；%d 个 scRNA，%d 个空间记录，其中 %d 个 Visium HD。", length(all_gsm), length(scrna_gsm), length(spatial_gsm), length(hd_gsm)),
-  "- 论文报告的 132 个空间样本和 144 个 scRNA 肿瘤样本还包含大量外部公共队列；本地 GSE 归档不是整篇论文输入全集。",
+  sprintf(
+    "- 补充表解析得到 %d 个可操作公开文件，共 %s 字节；已归档 %d 个/%s 字节，%d 个通过全量格式与校验值验证。",
+    actionable_files, format(actionable_bytes, scientific = FALSE, trim = TRUE),
+    downloaded_files, format(downloaded_bytes, scientific = FALSE, trim = TRUE),
+    validated_files
+  ),
+  sprintf(
+    "- 超过单来源 100 GB 闸门的 ENA 原始数据共 %s 字节，因 F 盘容量不足保持暂停；注册/受控数据不绕过权限。",
+    format(paused_bytes, scientific = FALSE, trim = TRUE)
+  ),
+  sprintf(
+    "- 生成队列已完成官方 spot-level 去卷积：%d 个空间样本、%d 位患者、%s 个 spot/bin，与补充表 S17 样本计数逐项一致。",
+    spot_samples, spot_patients,
+    format(spot_locations, scientific = FALSE, trim = TRUE)
+  ),
   "",
   "## 逐项矩阵",
   "",

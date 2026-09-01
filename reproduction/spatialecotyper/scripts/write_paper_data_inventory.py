@@ -109,7 +109,10 @@ def markdown(root: Path) -> str:
     run_status = root / "results/paper_reproduction/generated_visium_deconvolution/run-status.tsv"
     if run_status.exists():
         runs = read_tsv(run_status)
-        reproduced = [row for row in runs if row.get("status") == "SPOT_LEVEL_REPRODUCED"]
+        reproduced = [
+            row for row in runs
+            if row.get("status") in {"SPOT_LEVEL_REPRODUCED", "VERIFIED_EXISTING"}
+        ]
         locations = sum(integer(row, "locations") for row in reproduced)
         patients = len({row.get("patient_id", "") for row in reproduced})
         lines.extend([

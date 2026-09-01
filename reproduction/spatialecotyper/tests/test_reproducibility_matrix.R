@@ -52,4 +52,8 @@ stopifnot(grepl(
   fixed = TRUE
 ))
 
+report <- paste(readLines(report_path, warn = FALSE), collapse = "\n")
+stopifnot(grepl("69 个可操作公开文件", report, fixed = TRUE))
+stopifnot(grepl("262879 个 spot/bin", report, fixed = TRUE))
+
 message("paper reproducibility matrix: PASS")
