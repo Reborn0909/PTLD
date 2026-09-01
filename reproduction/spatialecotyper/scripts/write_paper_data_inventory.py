@@ -46,12 +46,17 @@ def markdown(root: Path) -> str:
         url = row.get("download_url", "")
         if source_gate.get(row["source_record_id"]) != "PASS":
             continue
-        if integer(row, "size_bytes") <= 0 or not url or url in seen_urls:
+        size = integer(row, "size_bytes")
+        bounded_unknown = row.get("repository") == "GITHUB" and size == 0
+        if (size <= 0 and not bounded_unknown) or not url or url in seen_urls:
             continue
         seen_urls.add(url)
         actionable.append(row)
 
     actionable_bytes = sum(integer(row, "size_bytes") for row in actionable)
+    bounded_unknown_files = sum(
+        integer(row, "size_bytes") == 0 for row in actionable
+    )
     verified_bytes = sum(integer(row, "actual_bytes") for row in files)
     passed = sum(row.get("validation_status") == "PASS" for row in validation)
     failed = len(validation) - passed
@@ -76,7 +81,7 @@ def markdown(root: Path) -> str:
         "",
         "## 可公开获取数据",
         "",
-        f"- 容量闸门通过并去重：{len(actionable)} 个文件，{actionable_bytes} 字节（{human_bytes(actionable_bytes)}）。",
+        f"- 容量闸门通过并去重：{len(actionable)} 个文件；已知大小合计 {actionable_bytes} 字节（{human_bytes(actionable_bytes)}），有界未知大小 {bounded_unknown_files} 个。",
         f"- 本地下载清单：{len(files)} 个文件，{verified_bytes} 字节（{human_bytes(verified_bytes)}）。",
         f"- 完整性验证：{passed}/{len(validation)} 通过；失败 {failed} 个。",
         "- 每个文件均保留原始 URL、accession、预期/实际字节数、SHA-256；上游提供 MD5 或 S3 multipart ETag 时另行校验。",

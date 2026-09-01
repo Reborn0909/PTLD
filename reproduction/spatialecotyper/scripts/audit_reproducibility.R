@@ -129,13 +129,18 @@ passed_sources <- download_capacity$source_record_id[
 paper_downloads$size_numeric <- suppressWarnings(as.numeric(paper_downloads$size_bytes))
 actionable <- paper_downloads[
   paper_downloads$source_record_id %in% passed_sources &
-    !is.na(paper_downloads$size_numeric) & paper_downloads$size_numeric > 0 &
+    ((!is.na(paper_downloads$size_numeric) & paper_downloads$size_numeric > 0) |
+      (paper_downloads$repository == "GITHUB" &
+        (is.na(paper_downloads$size_numeric) | paper_downloads$size_numeric == 0))) &
     nzchar(paper_downloads$download_url),
   , drop = FALSE
 ]
 actionable <- actionable[!duplicated(actionable$download_url), , drop = FALSE]
 actionable_files <- nrow(actionable)
-actionable_bytes <- sum(actionable$size_numeric)
+actionable_bytes <- sum(actionable$size_numeric, na.rm = TRUE)
+bounded_unknown_files <- sum(
+  is.na(actionable$size_numeric) | actionable$size_numeric == 0
+)
 paused_bytes <- sum(
   suppressWarnings(as.numeric(download_capacity$known_bytes[
     download_capacity$source_gate != "PASS"
@@ -195,8 +200,9 @@ publication_evidence <- data.frame(
       length(all_gsm), length(scrna_gsm), length(spatial_gsm), length(hd_gsm)
     ),
     sprintf(
-      "GSE320042 is SHA-verified; the resolved actionable public queue has %d files (%s bytes), of which %d files (%s bytes) are in the finalized download manifest and %d passed full validation.",
+      "GSE320042 is SHA-verified; the resolved actionable public queue has %d files (%s known bytes; %d bounded unknown-size files), of which %d files (%s bytes) are in the finalized download manifest and %d passed full validation.",
       actionable_files, format(actionable_bytes, scientific = FALSE, trim = TRUE),
+      bounded_unknown_files,
       downloaded_files, format(downloaded_bytes, scientific = FALSE, trim = TRUE),
       validated_files
     ),
@@ -268,8 +274,9 @@ report <- c(
   sprintf("- GSE320042：%s 字节，SHA-256 `%s`，%d 个 tar 成员。", tar_row$bytes, tar_row$sha256, length(members)),
   sprintf("- GEO 成员：%d 个 GSM；%d 个 scRNA，%d 个空间记录，其中 %d 个 Visium HD。", length(all_gsm), length(scrna_gsm), length(spatial_gsm), length(hd_gsm)),
   sprintf(
-    "- 补充表解析得到 %d 个可操作公开文件，共 %s 字节；已归档 %d 个/%s 字节，%d 个通过全量格式与校验值验证。",
+    "- 补充表解析得到 %d 个可操作公开文件，已知大小共 %s 字节，有界未知大小 %d 个；已归档 %d 个/%s 字节，%d 个通过全量格式与校验值验证。",
     actionable_files, format(actionable_bytes, scientific = FALSE, trim = TRUE),
+    bounded_unknown_files,
     downloaded_files, format(downloaded_bytes, scientific = FALSE, trim = TRUE),
     validated_files
   ),
