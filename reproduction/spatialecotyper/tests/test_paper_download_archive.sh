@@ -46,4 +46,10 @@ test "$(awk -F '\t' 'NR == 2 { print $10 }' "$manifest")" = "$expected"
 grep -Fq $'C\tPRJEB1\tPAUSED_SOURCE_GATE' "$skipped"
 grep -Fq $'D\t\tUNKNOWN_SIZE' "$skipped"
 
+if "$script" --root "$tmp" --phase all-actionable --jobs 1 --connections 17 \
+    >/dev/null 2>&1; then
+  echo "connections above aria2 per-server limit unexpectedly accepted" >&2
+  exit 1
+fi
+
 echo "paper download archive test: PASS"

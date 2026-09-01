@@ -30,7 +30,7 @@ cache_dir="$root/cache"
 [[ -s "$manifest" && -s "$capacity" ]]
 [[ "$jobs" =~ ^[1-9][0-9]*$ ]]
 [[ "$connections" =~ ^[1-9][0-9]*$ ]]
-(( connections <= 32 ))
+(( connections <= 16 ))
 case "$phase" in
   generated|spatial|scrna|bulk|all-actionable) ;;
   *) echo "invalid phase: $phase" >&2; exit 2 ;;
