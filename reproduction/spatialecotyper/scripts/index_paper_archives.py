@@ -2,7 +2,7 @@
 """Build a read-only member index for every validated paper data file."""
 
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict
 import csv
 import gzip
 from pathlib import Path
@@ -74,6 +74,10 @@ def classify_content_role(member_path: str) -> str:
     ):
         return "expression"
     if re_search_spatial_expression(logical_base):
+        return "expression"
+    if "score" in name:
+        return "other"
+    if logical_base.endswith((".tsv", ".csv", ".txt")):
         return "expression"
     if "feature" in name:
         return "feature"
@@ -208,12 +212,57 @@ def build_index(root: Path, expected_count: int = 74) -> tuple[list[dict], list[
     return all_members, summaries
 
 
+def reclassify_existing(
+    root: Path, expected_count: int = 74
+) -> tuple[list[dict], list[dict]]:
+    output = root / "results/reproducibility"
+    member_path = output / "paper-archive-members.tsv"
+    summary_path = output / "paper-container-summary.tsv"
+    members = _read_tsv(member_path)
+    summaries = _read_tsv(summary_path)
+    if len(summaries) != expected_count:
+        raise ValueError(f"expected {expected_count} indexed containers, observed {len(summaries)}")
+    if any(row["inspection_status"] != "PASS" for row in summaries):
+        raise ValueError("cannot reclassify an index containing failed containers")
+    summary_paths = {row["local_path"] for row in summaries}
+    if len(summary_paths) != expected_count:
+        raise ValueError("indexed container paths are not unique")
+    if any(row["local_path"] not in summary_paths for row in members):
+        raise ValueError("archive member references a container absent from the summary")
+
+    members_by_path = defaultdict(list)
+    for row in members:
+        row["content_role"] = classify_content_role(row["member_path"])
+        members_by_path[row["local_path"]].append(row)
+    for summary in summaries:
+        container_members = members_by_path[summary["local_path"]]
+        if not container_members:
+            raise ValueError(f"indexed container has no members: {summary['local_path']}")
+        roles = Counter(row["content_role"] for row in container_members)
+        summary["member_count"] = len(container_members)
+        summary["indexed_member_bytes"] = sum(
+            int(row["member_bytes"])
+            for row in container_members
+            if str(row["member_bytes"]).isdigit()
+        )
+        summary["content_roles"] = ";".join(
+            f"{role}:{roles[role]}" for role in sorted(roles)
+        )
+    _write_tsv(member_path, MEMBER_FIELDS, members)
+    _write_tsv(summary_path, SUMMARY_FIELDS, summaries)
+    return members, summaries
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default="/mnt/f/spatialecotyper_reproduction")
     parser.add_argument("--expected-count", type=int, default=74)
+    parser.add_argument("--reclassify-existing", action="store_true")
     args = parser.parse_args()
-    members, summaries = build_index(Path(args.root), args.expected_count)
+    if args.reclassify_existing:
+        members, summaries = reclassify_existing(Path(args.root), args.expected_count)
+    else:
+        members, summaries = build_index(Path(args.root), args.expected_count)
     failed = [row for row in summaries if row["inspection_status"] != "PASS"]
     if failed:
         raise SystemExit(

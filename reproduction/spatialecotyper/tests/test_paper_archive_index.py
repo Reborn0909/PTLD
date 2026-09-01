@@ -76,6 +76,21 @@ class PaperArchiveIndexTest(unittest.TestCase):
             module.classify_content_role("GSM3036911_PDAC-A-ST1-HE.jpg.gz"),
             "image",
         )
+        for table_name in (
+            "prostate-twelve/P3.2.tsv",
+            "GSM4416534_PT-3232.csv.gz",
+            "GSE72056_melanoma_single_cell_revised_v2.txt",
+            "GSE91061_BMS038109Sample.hg19KnownGene.fpkm.csv",
+        ):
+            self.assertEqual(
+                module.classify_content_role(table_name), "expression", table_name
+            )
+        self.assertEqual(
+            module.classify_content_role(
+                "GSE91061_BMS038109Sample_Cytolytic_Score_20161026.txt"
+            ),
+            "other",
+        )
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             paths = self.make_fixture(root)
@@ -131,6 +146,15 @@ class PaperArchiveIndexTest(unittest.TestCase):
             members, summaries = module.build_index(root, expected_count=len(paths))
             self.assertEqual(len(summaries), len(paths))
             self.assertGreater(len(members), len(paths))
+
+            raw_hidden = root / "raw-hidden"
+            (root / "raw").replace(raw_hidden)
+            reclassified_members, reclassified_summaries = module.reclassify_existing(
+                root, expected_count=len(paths)
+            )
+            self.assertEqual(len(reclassified_members), len(members))
+            self.assertEqual(len(reclassified_summaries), len(summaries))
+            raw_hidden.replace(root / "raw")
 
             with (results / "paper-file-validation.tsv").open(
                 newline="", encoding="utf-8"
