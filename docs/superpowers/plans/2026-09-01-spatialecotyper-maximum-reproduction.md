@@ -192,27 +192,29 @@ git commit -m "repro: map every paper panel to reproducibility evidence"
 - Consumes: only `READY_OFFICIAL_PROCESSED` datasets and panel rows with a fixed-repository entry point.
 - Produces: per-run provenance containing input SHA-256, official function, arguments, random seed, package version, output dimensions, runtime and status.
 
-- [ ] **Step 1: Write the execution gate test**
+- [x] **Step 1: Write the execution gate test**
 
 The test must reject `READY_RAW_ONLY`, access-blocked rows, missing coordinates and any function not exported by the installed SpatialEcoTyper 1.0.2 namespace.
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 Run in the fixed environment: `Rscript reproduction/spatialecotyper/tests/test_ready_paper_analyses.R`
 
 Expected: FAIL because the gated runner is absent.
 
-- [ ] **Step 3: Implement the official-function dispatcher**
+- [x] **Step 3: Implement the official-function dispatcher**
 
 Allow only the explicit function names already present in `paper-panel-reproduction.tsv`; set `set.seed()` from the table; write `.part` followed by atomic rename; validate existing outputs before reuse. Never implement a Liquid EcoTyper substitute.
 
-- [ ] **Step 4: Run all eligible rows and update panel audit evidence**
+- [x] **Step 4: Run all eligible rows and update panel audit evidence**
 
 Run: `Rscript reproduction/spatialecotyper/scripts/run_ready_paper_analyses.R`
 
 Expected: every eligible row is `PASS` or the run exits non-zero with a sample-specific error; ineligible rows are reported but never executed.
 
-- [ ] **Step 5: Commit**
+Observed on 2026-09-01: all 151 panel rows were ineligible because the fixed official repository exposes no panel-linked entrypoint in the curated mapping. The atomic gate and summary report `eligible=0`; no computation was dispatched or status upgraded.
+
+- [x] **Step 5: Commit**
 
 ```bash
 git add reproduction/spatialecotyper/scripts/run_ready_paper_analyses.R reproduction/spatialecotyper/tests/test_ready_paper_analyses.R
