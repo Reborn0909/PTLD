@@ -1,0 +1,36 @@
+name: spatialecotyper-1.0.2
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base=4.4.1
+  - r-seurat=5.1.0
+  - r-seuratobject=5.0.2
+  - r-dplyr=1.1.4
+  - r-tidyr=1.3.1
+  - r-ggplot2=3.5.1
+  - r-rcpp=1.0.13
+  - r-rann=2.6.2
+  - r-pals=1.9
+  - r-r.utils=2.12.3
+  - r-hdf5r=1.3.11
+  - r-spdep=1.4_2
+  - r-circlize
+  - r-remotes
+  - r-renv
+  - r-rmarkdown
+  - r-knitr
+  - r-biocmanager
+  - r-registry=0.5_1
+  - r-rngtools=1.5.2
+  - r-doparallel
+  - r-gridbase
+  - r-reshape2
+  - r-stringr
+  - r-rcolorbrewer
+  - c-compiler
+  - cxx-compiler
+  - fortran-compiler
+  - make
+  - pkg-config
+  - git

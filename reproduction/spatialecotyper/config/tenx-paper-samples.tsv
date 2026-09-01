@@ -1,0 +1,13 @@
+source_record_id	platform	paper_sample_id	download_sample_id	analysis_version	assay_path	expected_cells	required_files
+TableS1-R21	Xenium V1	Xenium_V1_FFPE_Human_Breast_IDC_With_Addon	Xenium_V1_FFPE_Human_Breast_IDC_With_Addon	1.3.0	xenium	576963	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R21	Xenium V1	Xenium_V1_hLiver_cancer_section_FFPE	Xenium_V1_hLiver_cancer_section_FFPE	1.9.0	xenium	162628	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R21	Xenium V1	Xenium_V1_hSkin_Melanoma_Add_on_FFPE	Xeniumranger_V1_hSkin_Melanoma_Add_on_FFPE	1.7.0	xenium	87499	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R21	Xenium V1	Xenium_V1_Human_Colorectal_Cancer_Addon_FFPE	Xenium_V1_Human_Colorectal_Cancer_Addon_FFPE	2.0.0	xenium	388175	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R21	Xenium V1	Xenium_V1_Human_Lung_Cancer_FFPE	Xenium_V1_Human_Lung_Cancer_FFPE	3.0.0	xenium	278659	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R22	Xenium V3 Prime	Xenium_V3_Prime_Breast_Cancer_FFPE	Xenium_Prime_Breast_Cancer_FFPE	3.0.0	xenium	699110	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R22	Xenium V3 Prime	Xenium_V3_Prime_Human_Lung_Cancer_FFPE	Xenium_Prime_Human_Lung_Cancer_FFPE	3.0.0	xenium	278328	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R22	Xenium V3 Prime	Xenium_V3_Prime_Human_Skin_FFPE	Xenium_Prime_Human_Skin_FFPE	3.0.0	xenium	112551	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R22	Xenium V3 Prime	Xenium_V3_Prime_Human_Ovary_FF	Xenium_Prime_Human_Ovary_FF	3.0.0	xenium	1157659	cell_feature_matrix.h5;cells.csv.gz;experiment.xenium
+TableS1-R20	Visium HD	Visium_HD_CRC_P2_Tumor	Visium_HD_Human_Colon_Cancer	3.0.0	spatial-exp	545913	binned_outputs.tar.gz;spatial.tar.gz
+TableS1-R20	Visium HD	Visium_HD_FF_Human_Breast_Cancer	Visium_HD_FF_Human_Breast_Cancer	3.1.2	spatial-exp	583104	binned_outputs.tar.gz;spatial.tar.gz
+TableS1-R20	Visium HD	Visium_HD_Human_Breast_Cancer_Fresh_Frozen	Visium_HD_Human_Breast_Cancer_Fresh_Frozen	3.1.1	spatial-exp	472859	binned_outputs.tar.gz;spatial.tar.gz

@@ -1,0 +1,9 @@
+key	value	source
+git_commit	48c2c846781d3a312771021c1a2ef5fc383700c5	local official repository paper-day commit
+package_version	1.0.2	DESCRIPTION and eight bundled tutorial HTML files
+r_version	4.4.1	eight bundled tutorial HTML sessionInfo outputs
+seurat_version	5.1.0	eight bundled tutorial HTML sessionInfo outputs
+matrix_version	1.7-0	eight bundled tutorial HTML sessionInfo outputs
+nmf_version	0.28	eight bundled tutorial HTML sessionInfo outputs
+geo_accession	GSE320042	Nature data availability and NCBI GEO
+geo_raw_url	https://ftp.ncbi.nlm.nih.gov/geo/series/GSE320nnn/GSE320042/suppl/GSE320042_RAW.tar	NCBI GEO official supplementary directory

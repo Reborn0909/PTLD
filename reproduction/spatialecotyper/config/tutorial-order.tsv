@@ -1,0 +1,9 @@
+order	tutorial_id	rmd
+1	T01	SingleSample.Rmd
+2	T02	Integration.Rmd
+3	T03	TrainRecoveryModel.Rmd
+4	T04	Discovery_SE_CellStates.Rmd
+5	T05	Recovery_scST.Rmd
+6	T06	Recovery_scRNA.Rmd
+7	T07	TrainDeconvModel.Rmd
+8	T08	Recovery_Bulk.Rmd
