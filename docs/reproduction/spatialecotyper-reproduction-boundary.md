@@ -7,7 +7,7 @@
 
 - 严格论文级复现：0 项。当前没有完整论文计算满足输入、代码、参数、随机性和目标输出全部可核验。
 - 官方教程级复现：8 项；8 个 Rmd 均已运行。
-- 仅方法级：7 项。
+- 仅方法级：8 项。
 - 因官方材料缺失而阻断：3 项。
 - T02 不是严格材料复现：官方归档 RDS 缺少固定代码要求的 `Spot.X/Spot.Y`，因此使用 T01 按官方流程生成的上游输出。
 
@@ -16,7 +16,9 @@
 - 固定仓库：29 个 R 文件、8 个 Rmd、0 个 Python、0 个 notebook。
 - GSE320042：4936970240 字节，SHA-256 `f4d31a629a2c42d7d21c1fd6cf43cd71d115a04bdd6d3f3730cf91d37f9335b3`，154 个 tar 成员。
 - GEO 成员：24 个 GSM；7 个 scRNA，17 个空间记录，其中 2 个 Visium HD。
-- 论文报告的 132 个空间样本和 144 个 scRNA 肿瘤样本还包含大量外部公共队列；本地 GSE 归档不是整篇论文输入全集。
+- 补充表解析得到 74 个可操作公开文件，已知大小共 61211570350 字节，有界未知大小 1 个；已归档 74 个/62208522084 字节，74 个通过全量格式与校验值验证。
+- 超过单来源 100 GB 闸门的 ENA 原始数据共 2703204515666 字节，因 F 盘容量不足保持暂停；注册/受控数据不绕过权限。
+- 生成队列已完成官方 spot-level 去卷积：17 个空间样本、15 位患者、262879 个 spot/bin，与补充表 S17 样本计数逐项一致。
 
 ## 逐项矩阵
 
@@ -36,6 +38,7 @@
 | Nine-SE pan-cancer discovery on the full spatial atlas | `METHOD_ONLY` | `/mnt/f/spatialecotyper_reproduction/results/reproducibility/publication-evidence.tsv` | Paper-scale inputs, orchestration, perturbation runs and exact figure-level outputs are not packaged together |
 | Cross-platform SE validation and spatial colocalization | `METHOD_ONLY` | `/mnt/f/spatialecotyper_reproduction/results/reproducibility/publication-evidence.tsv` | The full held-out 90-sample validation workflow and all platform-specific preprocessing scripts are absent |
 | Paired bulk RNA-seq and Visium validation | `METHOD_ONLY` | `/mnt/f/spatialecotyper_reproduction/results/reproducibility/publication-evidence.tsv` | Exact pairing table-to-analysis code and panel-generation script are not in the fixed repository |
+| Melanoma tumour spatial SE inference for the paired plasma cohort | `METHOD_ONLY` | `/mnt/f/spatialecotyper_reproduction/results/paper_reproduction/generated_visium_deconvolution/supplementary-table-s17-comparison.tsv` | Paper sample-level SE values require unpublished CytoSPACE cell-count weights; Liquid EcoTyper plasma inference and exact figure code are not public |
 | Complete main and extended-data figure generation | `BLOCKED_NOT_PUBLIC` | `/mnt/f/spatialecotyper_reproduction/results/reproducibility/source-code-inventory.tsv` | Exact paper panels cannot be regenerated without unpublished plotting and cohort-integration scripts |
 | TCGA and ICI outcome association statistics | `METHOD_ONLY` | `/mnt/f/spatialecotyper_reproduction/results/reproducibility/publication-evidence.tsv` | No official executable analysis script recreates all survival response covariate and multiple-testing results |
 | Liquid EcoTyper PyTorch training | `BLOCKED_NOT_PUBLIC` | `/mnt/f/spatialecotyper_reproduction/results/reproducibility/source-code-inventory.tsv` | Network implementation training code exact simulation pipeline seeds and model weights are not locally public in the cited repository |

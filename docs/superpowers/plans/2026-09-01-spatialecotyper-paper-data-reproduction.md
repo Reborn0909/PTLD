@@ -75,11 +75,11 @@
 - Produce: `/mnt/f/spatialecotyper_reproduction/raw/paper_generated/`
 - Produce: `/mnt/f/spatialecotyper_reproduction/archive/manifests/paper-file-sha256.tsv`
 
-- [ ] **Step 1: 写幂等/损坏检测测试**：验证 `.part`、断点续传、大小检查、SHA 校验、原子重命名和重复运行跳过。
-- [ ] **Step 2: 下载 Stanford DOI 可直接公开的 processed/normalized 文件**；若网页强制登录，则只标记 `REGISTRATION_REQUIRED`，不创建账户、不猜测直链。
-- [ ] **Step 3: 对 GSE320042 已下载归档做去重登记**：引用已有 4.6 GB tar 与 SHA，不重复下载。
-- [ ] **Step 4: 下载其它作者生成、无需协议的处理后数据**，逐文件写 manifest 和日志。
-- [ ] **Step 5: 验证文件完整性并提交脚本/清单定义**：`git commit -m "data: archive public paper-generated datasets"`。
+- [x] **Step 1: 写幂等/损坏检测测试**：验证 `.part`、断点续传、大小检查、SHA 校验、原子重命名和重复运行跳过。
+- [x] **Step 2: 下载 Stanford DOI 可直接公开的 processed/normalized 文件**；若网页强制登录，则只标记 `REGISTRATION_REQUIRED`，不创建账户、不猜测直链。
+- [x] **Step 3: 对 GSE320042 已下载归档做去重登记**：引用已有 4.6 GB tar 与 SHA，不重复下载。
+- [x] **Step 4: 下载其它作者生成、无需协议的处理后数据**，逐文件写 manifest 和日志。
+- [x] **Step 5: 验证文件完整性并提交脚本/清单定义**：`git commit -m "data: archive public paper-generated datasets"`。
 
 ### Task 5: 下载公开空间转录组和单细胞参考队列
 
@@ -90,11 +90,11 @@
 - Produce: `/mnt/f/spatialecotyper_reproduction/raw/public_spatial/`
 - Produce: `/mnt/f/spatialecotyper_reproduction/raw/public_scrna/`
 
-- [ ] **Step 1: 按容量闸门通过顺序下载 S1 空间队列**：processed matrices、coordinates、images/segmentation metadata 优先；每个 accession 独立日志和 SHA。
-- [ ] **Step 2: 下载 S2 单细胞参考队列**：优先论文使用的 count matrix/metadata，不用替代版本；受控来源保留 ledger。
-- [ ] **Step 3: 验证 S8 单细胞尺度空间样本**：平台、癌种、发现/验证分组、纳入/排除标记与补充表逐行一致。
-- [ ] **Step 4: 运行样本审计**：报告 `expected/available/downloaded/verified/blocked`，任何数目差异必须列出确切样本 ID。
-- [ ] **Step 5: 提交**：`git commit -m "data: archive public spatial and single-cell cohorts"`。
+- [x] **Step 1: 按容量闸门通过顺序下载 S1 空间队列**：processed matrices、coordinates、images/segmentation metadata 优先；每个 accession 独立日志和 SHA。
+- [x] **Step 2: 下载 S2 单细胞参考队列**：优先论文使用的 count matrix/metadata，不用替代版本；受控来源保留 ledger。
+- [x] **Step 3: 验证 S8 单细胞尺度空间样本**：平台、癌种、发现/验证分组、纳入/排除标记与补充表逐行一致。
+- [x] **Step 4: 运行样本审计**：报告 `expected/available/downloaded/verified/blocked`，任何数目差异必须列出确切样本 ID。
+- [x] **Step 5: 提交**：`git commit -m "data: archive public spatial and single-cell cohorts"`。
 
 ### Task 6: 构建原文计算输入，不改变算法
 
@@ -103,11 +103,11 @@
 - Create: `reproduction/spatialecotyper/tests/test_paper_inputs.R`
 - Produce: `/mnt/f/spatialecotyper_reproduction/work/paper_inputs/`
 
-- [ ] **Step 1: 写输入契约测试**：只接受补充方法明确的矩阵、metadata、coordinates 和平台字段；禁止推测缺失标签。
-- [ ] **Step 2: 实现原文预处理接口**：Visium 使用 Space Ranger/Seurat 原文阈值；公开的 Visium HD 单细胞尺度验证数据使用 8 µm × 8 µm bins，而研究生成、用于患者肿瘤–血浆配对去卷积的 Visium HD 使用 16 µm bins；两者均过滤 `<20 detected genes` 或 `>10% mitochondrial` 的 bins。无法由公开材料确定的步骤停止在 `METHOD_GAP`。
-- [ ] **Step 3: 构建 discovery/reference/recovery 输入**：记录每一步输入文件 SHA、参数、软件版本、随机种子和输出维度。
-- [ ] **Step 4: 验证样本数与矩阵尺寸**：与 S1/S2/S8 和原文 Methods 交叉核对。
-- [ ] **Step 5: 提交**：`git commit -m "repro: prepare paper-derived Spatial EcoTyper inputs"`。
+- [x] **Step 1: 写输入契约测试**：只接受补充方法明确的矩阵、metadata、coordinates 和平台字段；禁止推测缺失标签。
+- [x] **Step 2: 实现原文预处理接口**：Visium 使用 Space Ranger/Seurat 原文阈值；公开的 Visium HD 单细胞尺度验证数据使用 8 µm × 8 µm bins，而研究生成、用于患者肿瘤–血浆配对去卷积的 Visium HD 使用 16 µm bins；两者均过滤 `<20 detected genes` 或 `>10% mitochondrial` 的 bins。无法由公开材料确定的步骤停止在 `METHOD_GAP`。
+- [x] **Step 3: 构建 discovery/reference/recovery 输入**：记录每一步输入文件 SHA、参数、软件版本、随机种子和输出维度。
+- [x] **Step 4: 验证样本数与矩阵尺寸**：与 S1/S2/S8 和原文 Methods 交叉核对。
+- [x] **Step 5: 提交**：`git commit -m "repro: prepare paper-derived Spatial EcoTyper inputs"`。
 
 ### Task 7: 执行论文级计算复现与定量比对
 
@@ -118,11 +118,11 @@
 - Modify: `reproduction/spatialecotyper/config/paper-computation-inventory.tsv`
 - Produce: `/mnt/f/spatialecotyper_reproduction/results/paper_reproduction/`
 
-- [ ] **Step 1: 将正文/扩展数据每项计算映射到输入、官方函数和预期输出**，继续区分 strict/tutorial/method-only/blocked。
-- [ ] **Step 2: 运行官方 Spatial EcoTyper 发现、恢复、整合流程**：只调用固定提交中的官方 API；不补写 Liquid EcoTyper 深度学习代码。
-- [ ] **Step 3: 比对定量结果**：cell state/SE 数目、样本分组、相关性/效应方向、可获得的表格数值；设置明确容差并输出 diff。
-- [ ] **Step 4: 对缺失代码、受控数据和认证数据生成阻塞证据**，不得用教程成功替代论文成功。
-- [ ] **Step 5: 提交**：`git commit -m "repro: run paper-level Spatial EcoTyper analyses"`。
+- [x] **Step 1: 将正文/扩展数据每项计算映射到输入、官方函数和预期输出**，继续区分 strict/tutorial/method-only/blocked。
+- [x] **Step 2: 运行官方 Spatial EcoTyper 发现、恢复、整合流程**：只调用固定提交中的官方 API；不补写 Liquid EcoTyper 深度学习代码。
+- [x] **Step 3: 比对定量结果**：cell state/SE 数目、样本分组、相关性/效应方向、可获得的表格数值；设置明确容差并输出 diff。
+- [x] **Step 4: 对缺失代码、受控数据和认证数据生成阻塞证据**，不得用教程成功替代论文成功。
+- [x] **Step 5: 提交**：`git commit -m "repro: run paper-level Spatial EcoTyper analyses"`。
 
 ### Task 8: 最终下载与复现审计
 
@@ -132,8 +132,8 @@
 - Create: `docs/reproduction/spatialecotyper-paper-data-inventory.md`
 - Produce: `/mnt/f/spatialecotyper_reproduction/results/reproducibility/paper-final-audit.txt`
 
-- [ ] **Step 1: 运行所有单元、清单、SHA、样本数和官方教程回归测试**。
-- [ ] **Step 2: 生成完整磁盘清单**：逐层字节数、文件数、最大文件、重复文件和未完成 `.part`。
-- [ ] **Step 3: 更新复现边界**：逐正文图/扩展图列出 `STRICT_PASS`、`PARTIAL_PASS`、`METHOD_ONLY`、`BLOCKED_ACCESS`、`BLOCKED_CODE`。
-- [ ] **Step 4: 运行最终审计**：要求零损坏文件、零不明来源文件、零算法改动；保留所有受控/认证阻塞项。
-- [ ] **Step 5: 提交并推送当前 PR 分支**：`git commit -m "docs: report paper data and reproduction audit"`。
+- [x] **Step 1: 运行所有单元、清单、SHA、样本数和官方教程回归测试**。
+- [x] **Step 2: 生成完整磁盘清单**：逐层字节数、文件数、最大文件、重复文件和未完成 `.part`。
+- [x] **Step 3: 更新复现边界**：逐正文图/扩展图列出 `STRICT_PASS`、`PARTIAL_PASS`、`METHOD_ONLY`、`BLOCKED_ACCESS`、`BLOCKED_CODE`。
+- [x] **Step 4: 运行最终审计**：要求零损坏文件、零不明来源文件、零算法改动；保留所有受控/认证阻塞项。
+- [x] **Step 5: 提交并推送当前 PR 分支**：`git commit -m "docs: report paper data and reproduction audit"`。
