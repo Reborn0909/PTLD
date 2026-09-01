@@ -77,27 +77,27 @@ git commit -m "data: index every paper figure panel"
 - Consumes: `paper-file-sha256.tsv` with exactly 74 verified local paths.
 - Produces: `inspect_container(path: Path) -> Iterable[MemberRecord]` where `MemberRecord` contains `local_path`, `member_path`, `member_bytes`, `container_type`, `content_role`, and `inspection_status`.
 
-- [ ] **Step 1: Write fixtures for tar, tar.gz, zip, gzip, HDF5 and plain files**
+- [x] **Step 1: Write fixtures for tar, tar.gz, zip, gzip, HDF5 and plain files**
 
 The test must assert member names and sizes, prevent path extraction, and reject any manifest row whose file is missing or not present in the 74-row validation table.
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 Run: `python reproduction/spatialecotyper/tests/test_paper_archive_index.py`
 
 Expected: FAIL because the archive indexer does not exist.
 
-- [ ] **Step 3: Implement read-only streaming inspection**
+- [x] **Step 3: Implement read-only streaming inspection**
 
 Use `tarfile.open(..., "r|*")`, `zipfile.ZipFile.infolist()`, `gzip.GzipFile.peek(1)`, and `h5py.File.visititems()`. Never call `extract`, `extractall`, or write archive members to disk. Classify paths with fixed roles: `expression`, `barcode`, `feature`, `coordinate`, `image`, `segmentation`, `metadata`, `model`, or `other`.
 
-- [ ] **Step 4: Run the full index and contract test**
+- [x] **Step 4: Run the full index and contract test**
 
 Run: `python reproduction/spatialecotyper/scripts/index_paper_archives.py --root /mnt/f/spatialecotyper_reproduction`
 
 Expected: 74 containers, zero `INSPECTION_FAIL`, and no growth of `work/` attributable to archive extraction.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add reproduction/spatialecotyper/scripts/index_paper_archives.py reproduction/spatialecotyper/tests/test_paper_archive_index.py
