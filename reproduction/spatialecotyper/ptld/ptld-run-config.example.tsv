@@ -1,0 +1,14 @@
+key	value	note
+source_commit	48c2c846781d3a312771021c1a2ef5fc383700c5	Fixed official SpatialEcoTyper source
+package_version	1.0.2	Fixed official package version
+normalization_method	REQUIRED	Record exact method and parameters
+input_expression_sha256	REQUIRED	SHA-256 of the expression input
+input_metadata_sha256	REQUIRED	SHA-256 of the metadata input
+cell_type_mapping_sha256	REQUIRED	SHA-256 of the explicit mapping table
+sample_ids	REQUIRED	Comma-separated de-identified identifiers
+coordinate_unit	REQUIRED	Must be compatible with radius
+min_cells_per_sample	20	Validation threshold
+nfeatures	300	Official Tutorial 1 default
+radius	50	Official Tutorial 1 default
+ncores	2	Official Tutorial 1 default
+analysis_utc	REQUIRED	ISO 8601 execution time
