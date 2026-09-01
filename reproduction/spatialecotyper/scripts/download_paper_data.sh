@@ -4,6 +4,7 @@ set -euo pipefail
 root=/mnt/f/spatialecotyper_reproduction
 phase=all-actionable
 jobs=3
+connections=16
 manifest=""
 capacity=""
 
@@ -12,6 +13,7 @@ while (( $# > 0 )); do
     --root) root=$2; shift 2 ;;
     --phase) phase=$2; shift 2 ;;
     --jobs) jobs=$2; shift 2 ;;
+    --connections) connections=$2; shift 2 ;;
     --manifest) manifest=$2; shift 2 ;;
     --capacity) capacity=$2; shift 2 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
@@ -27,6 +29,8 @@ cache_dir="$root/cache"
 
 [[ -s "$manifest" && -s "$capacity" ]]
 [[ "$jobs" =~ ^[1-9][0-9]*$ ]]
+[[ "$connections" =~ ^[1-9][0-9]*$ ]]
+(( connections <= 32 ))
 case "$phase" in
   generated|spatial|scrna|bulk|all-actionable) ;;
   *) echo "invalid phase: $phase" >&2; exit 2 ;;
@@ -146,7 +150,7 @@ download_one() {
       printf '%s attempt=%s offset=%s url=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$attempt" "$offset" "$url" >> "$log"
       if [[ "$url" =~ ^https?:// ]] && command -v aria2c >/dev/null 2>&1; then
         if aria2c --continue=true --auto-file-renaming=false --allow-overwrite=true \
-            --max-connection-per-server=8 --split=8 --min-split-size=1M \
+            --max-connection-per-server="$connections" --split="$connections" --min-split-size=1M \
             --file-allocation=none --max-tries=4 --retry-wait=5 --timeout=60 \
             --summary-interval=30 --console-log-level=notice \
             --dir="$(dirname "$part")" --out="$(basename "$part")" "$url" >> "$log" 2>&1; then

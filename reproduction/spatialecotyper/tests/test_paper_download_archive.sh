@@ -29,7 +29,7 @@ size_paused=$(stat -c %s "$tmp/source/paused.bin")
   printf 'D\t\tPUBLIC_API\t1\t0\t1\tPASS\t1000\t100\t3\tPASS\tunknown\n'
 } > "$tmp/results/reproducibility/paper-download-capacity.tsv"
 
-"$script" --root "$tmp" --phase all-actionable --jobs 2
+"$script" --root "$tmp" --phase all-actionable --jobs 2 --connections 1
 
 manifest="$tmp/archive/manifests/paper-file-sha256.tsv"
 skipped="$tmp/archive/manifests/paper-download-skipped.tsv"
