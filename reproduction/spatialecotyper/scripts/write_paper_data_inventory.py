@@ -16,6 +16,10 @@ def read_tsv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle, delimiter="\t"))
 
 
+def read_optional_tsv(path: Path) -> list[dict[str, str]]:
+    return read_tsv(path) if path.is_file() else []
+
+
 def integer(row: dict[str, str], key: str) -> int:
     value = row.get(key, "")
     return int(value) if value and value.isdigit() else 0
@@ -38,6 +42,12 @@ def markdown(root: Path) -> str:
     capacity = read_tsv(results / "paper-download-capacity.tsv")
     files = read_tsv(manifests / "paper-file-sha256.tsv")
     validation = read_tsv(results / "paper-file-validation.tsv")
+    figures = read_optional_tsv(manifests / "paper-figures.tsv")
+    panels = read_optional_tsv(manifests / "paper-panels.tsv")
+    containers = read_optional_tsv(results / "paper-container-summary.tsv")
+    readiness = read_optional_tsv(results / "paper-dataset-readiness.tsv")
+    panel_audit = read_optional_tsv(results / "paper-panel-audit.tsv")
+    update_report = read_optional_tsv(results / "official-material-update-report.tsv")
 
     source_gate = {row["source_record_id"]: row["source_gate"] for row in capacity}
     seen_urls: set[str] = set()
@@ -129,6 +139,26 @@ def markdown(root: Path) -> str:
             "- 输出为 NonSE 与 SE1–SE9 spot/bin 分数；样本平面的加权汇总因缺失论文使用的 CytoSPACE 细胞数权重而标记为 `METHOD_GAP`。",
         ])
 
+    if all((figures, panels, containers, readiness, panel_audit, update_report)):
+        readiness_counts: dict[str, int] = defaultdict(int)
+        for row in readiness:
+            readiness_counts[row["readiness_class"]] += 1
+        panel_counts: dict[str, int] = defaultdict(int)
+        for row in panel_audit:
+            panel_counts[row["status"]] += 1
+        latest_revision = update_report[0]["latest_revision"]
+        lines.extend([
+            "",
+            "## 第二阶段逐图板审计",
+            "",
+            f"- 论文图清单：{len(figures)} 张；显式图板：{len(panels)} 个。",
+            f"- 74 个已验证容器流式索引为 {sum(integer(row, 'member_count') for row in containers)} 个内部成员；检查失败 {sum(row.get('inspection_status') != 'PASS' for row in containers)} 个。",
+            f"- 数据集就绪分类：{'; '.join(f'{key}={value}' for key, value in sorted(readiness_counts.items()))}。",
+            f"- 图板复现分类：{'; '.join(f'{key}={value}' for key, value in sorted(panel_counts.items()))}。",
+            "- 当前 `STRICT_PASS=0`；spot/bin级官方API输出不能替代缺失的论文预处理、派生权重和作图链。",
+            f"- 官方仓库最新探测提交：`{latest_revision}`；Liquid EcoTyper、CytoSPACE权重和作图脚本均无解除阻塞的候选文件。",
+        ])
+
     lines.extend([
         "",
         "## 证据文件",
@@ -137,6 +167,11 @@ def markdown(root: Path) -> str:
         f"- `{manifests / 'paper-file-sha256.tsv'}`",
         f"- `{results / 'paper-download-capacity.tsv'}`",
         f"- `{results / 'paper-file-validation.tsv'}`",
+        f"- `{results / 'paper-container-summary.tsv'}`",
+        f"- `{results / 'paper-dataset-readiness.tsv'}`",
+        f"- `{results / 'paper-panel-audit.tsv'}`",
+        f"- `{results / 'official-material-update-report.tsv'}`",
+        f"- `{results / 'access-request-evidence.tsv'}`",
         "",
     ])
     return "\n".join(lines)

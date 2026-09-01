@@ -322,21 +322,21 @@ git commit -m "docs: prepare missing-material access evidence"
 - Consumes: all Task 1–7 outputs.
 - Produces: a final panel-level report and non-zero audit failure for missing panels, stale inputs, invalid status upgrades, corrupt files or algorithm modifications.
 
-- [ ] **Step 1: Add explicit final-audit assertions**
+- [x] **Step 1: Add explicit final-audit assertions**
 
 Require `figures=26`, archive container rows `=74`, zero unknown dataset classes, full panel coverage, zero invalid `STRICT_PASS`, zero failed eligible runs and zero `.part/.aria2` files.
 
-- [ ] **Step 2: Extend and run the shell audit**
+- [x] **Step 2: Extend and run the shell audit**
 
 Run: `bash reproduction/spatialecotyper/scripts/final_audit.sh`
 
 Expected: non-zero until every new manifest and test passes; after implementation, the last line must be `FINAL_AUDIT\tPASS`.
 
-- [ ] **Step 3: Generate the Chinese panel-level report**
+- [x] **Step 3: Generate the Chinese panel-level report**
 
 The report must tabulate every figure and panel, status counts, exact evidence paths, remaining blocker classes and the user action required for access-controlled materials.
 
-- [ ] **Step 4: Run fresh independent assertions**
+- [x] **Step 4: Run fresh independent assertions**
 
 ```bash
 test "$(awk 'END{print NR-1}' paper-figures.tsv)" -eq 26
@@ -344,7 +344,7 @@ test "$(awk 'END{print NR-1}' paper-file-sha256.tsv)" -eq 74
 test -z "$(find /mnt/f/spatialecotyper_reproduction/raw /mnt/f/spatialecotyper_reproduction/archive -type f \( -name '*.part' -o -name '*.aria2' \) -print -quit)"
 ```
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add reproduction/spatialecotyper/scripts/final_audit.sh docs/reproduction/spatialecotyper-panel-level-reproduction.md docs/reproduction/spatialecotyper-paper-data-inventory.md

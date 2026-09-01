@@ -46,6 +46,12 @@ audit_body() {
   python3 reproduction/spatialecotyper/tests/test_paper_file_validation.py
   python3 reproduction/spatialecotyper/tests/test_paper_sample_validation.py
   python3 reproduction/spatialecotyper/tests/test_paper_data_inventory.py
+  python3 reproduction/spatialecotyper/tests/test_paper_panel_manifest.py
+  python3 reproduction/spatialecotyper/tests/test_paper_archive_index.py
+  python3 reproduction/spatialecotyper/tests/test_paper_dataset_readiness.py
+  python3 reproduction/spatialecotyper/tests/test_paper_panel_reproduction.py
+  python3 reproduction/spatialecotyper/tests/test_official_material_probe.py
+  python3 reproduction/spatialecotyper/tests/test_access_request_evidence.py
 
   test -s "$activation_file"
   mamba_root=$(awk -F= '$1 == "MAMBA_ROOT_PREFIX" { print $2; exit }' "$activation_file")
@@ -71,10 +77,25 @@ audit_body() {
   run_r_test reproduction/spatialecotyper/tests/test_gse_object_audit.R
   run_r_test reproduction/spatialecotyper/tests/test_paper_reproduction.R
   run_r_test reproduction/spatialecotyper/tests/test_compare_paper_outputs.R
+  run_r_test reproduction/spatialecotyper/tests/test_ready_paper_analyses.R
+  "$micromamba_bin" --no-rc --root-prefix "$mamba_root" \
+    run --prefix "$env_prefix" Rscript \
+    reproduction/spatialecotyper/scripts/run_ready_paper_analyses.R --root "$data_root"
+
+  python3 reproduction/spatialecotyper/scripts/classify_paper_dataset_readiness.py \
+    --root "$data_root"
+  python3 reproduction/spatialecotyper/scripts/audit_paper_panels.py \
+    --root "$data_root"
+  python3 reproduction/spatialecotyper/scripts/write_access_request_evidence.py \
+    --root "$data_root" \
+    --output docs/reproduction/spatialecotyper-access-request-checklist.md
 
   python3 reproduction/spatialecotyper/scripts/write_paper_data_inventory.py \
     --root "$data_root" \
     --output docs/reproduction/spatialecotyper-paper-data-inventory.md
+  python3 reproduction/spatialecotyper/scripts/write_panel_reproduction_report.py \
+    --root "$data_root" \
+    --output docs/reproduction/spatialecotyper-panel-level-reproduction.md
 
   file_validation="$data_root/results/reproducibility/paper-file-validation.tsv"
   file_manifest="$data_root/archive/manifests/paper-file-sha256.tsv"
@@ -108,6 +129,31 @@ audit_body() {
     }
   ' "$matrix_path"
   pass "three unpublished computation boundaries are explicit"
+
+  figure_manifest="$data_root/archive/manifests/paper-figures.tsv"
+  panel_manifest="$data_root/archive/manifests/paper-panels.tsv"
+  container_summary="$data_root/results/reproducibility/paper-container-summary.tsv"
+  dataset_readiness="$data_root/results/reproducibility/paper-dataset-readiness.tsv"
+  panel_audit="$data_root/results/reproducibility/paper-panel-audit.tsv"
+  execution_gate="$data_root/results/paper_reproduction/ready_analyses/execution-gate.tsv"
+  execution_summary="$data_root/results/paper_reproduction/ready_analyses/execution-summary.tsv"
+  update_report="$data_root/results/reproducibility/official-material-update-report.tsv"
+  request_evidence="$data_root/results/reproducibility/access-request-evidence.tsv"
+  test "$(( $(wc -l < "$figure_manifest") - 1 ))" -eq 26
+  test "$(( $(wc -l < "$panel_manifest") - 1 ))" -eq 151
+  test "$(( $(wc -l < "$container_summary") - 1 ))" -eq 74
+  test "$(( $(wc -l < "$dataset_readiness") - 1 ))" -eq 46
+  test "$(( $(wc -l < "$panel_audit") - 1 ))" -eq 151
+  test "$(( $(wc -l < "$execution_gate") - 1 ))" -eq 151
+  test "$(( $(wc -l < "$update_report") - 1 ))" -eq 3
+  test "$(( $(wc -l < "$request_evidence") - 1 ))" -eq 4
+  python3 reproduction/spatialecotyper/tests/test_maximum_reproduction_audit.py
+  pass "26 figures, 151 panels, 74 containers and 46 datasets are fully audited"
+
+  update_archive=$(find "$data_root/archive/official-updates" -maxdepth 1 -type f -name 'spatialecotyper-*.tar.gz' -print -quit)
+  test -n "$update_archive"
+  gzip -t "$update_archive"
+  pass "new official source revision is separately archived and gzip-valid"
 
   printf 'Disk usage by F-drive layer\n'
   printf 'layer\tbytes\n'
