@@ -46,6 +46,19 @@ class PaperPanelManifestTest(unittest.TestCase):
             {row["figure_id"] for row in panels},
             {row["figure_id"] for row in figures},
         )
+        supplementary_one = next(
+            row for row in figures if row["figure_id"] == "SUPPLEMENTARY-1"
+        )
+        self.assertEqual(supplementary_one["source_locator"], "page:4")
+        self.assertNotIn("Supplementary Fig. 2:", supplementary_one["caption"])
+        self.assertEqual(
+            [
+                row["panel_label"]
+                for row in panels
+                if row["figure_id"] == "SUPPLEMENTARY-1"
+            ],
+            ["a", "b", "c"],
+        )
         main_one_labels = [
             row["panel_label"] for row in panels if row["figure_id"] == "MAIN-1"
         ]

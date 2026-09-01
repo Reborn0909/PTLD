@@ -152,7 +152,10 @@ def extract_supplementary_figures(path: Path) -> list[dict]:
     try:
         for page_index, page in enumerate(document):
             text = normalize(page.get_text("text"))
-            match = re.search(r"Supplementary Fig\.\s*(\d+):\s*(.*)", text)
+            match = re.match(
+                r"^\d+\s+(?:Supplementary Figures\s+)?Supplementary Fig\.\s*(\d+):\s*(.*)",
+                text,
+            )
             if not match:
                 continue
             number = int(match.group(1))
