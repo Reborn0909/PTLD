@@ -64,6 +64,7 @@ audit_body() {
   run_r_test reproduction/spatialecotyper/tests/test_source_lock.R
   run_r_test reproduction/spatialecotyper/tests/test_environment.R
   run_r_test reproduction/spatialecotyper/tests/test_tutorial_runs.R
+  run_r_test reproduction/spatialecotyper/scripts/audit_reproducibility.R
   run_r_test reproduction/spatialecotyper/tests/test_reproducibility_matrix.R
   run_r_test reproduction/spatialecotyper/tests/test_ptld_adapter.R
   run_r_test reproduction/spatialecotyper/tests/test_paper_inputs.R
