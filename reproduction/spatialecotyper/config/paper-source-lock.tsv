@@ -1,0 +1,5 @@
+source_id	doi	filename	url	expected_bytes	sha256
+article_html	10.1038/s41586-026-10452-4	nature-article.html	https://www.nature.com/articles/s41586-026-10452-4	997901	df5ced1715b3efc29b62211e065dd2d1c710d9ebc68cf29386f42d229cdbda44
+supplementary_pdf	10.1038/s41586-026-10452-4	41586_2026_10452_MOESM1_ESM.pdf	https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41586-026-10452-4/MediaObjects/41586_2026_10452_MOESM1_ESM.pdf	3300403	f717f30a8693d9ea0413d856c259cbcfa945e4b56fa117d59da58adb0467bd35
+reporting_summary_pdf	10.1038/s41586-026-10452-4	41586_2026_10452_MOESM2_ESM.pdf	https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41586-026-10452-4/MediaObjects/41586_2026_10452_MOESM2_ESM.pdf	3115846	abb748d6bde80f7690d2de8219f91a305e488f7a010c10273b07534d987e3e64
+supplementary_tables_xlsx	10.1038/s41586-026-10452-4	41586_2026_10452_MOESM3_ESM.xlsx	https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41586-026-10452-4/MediaObjects/41586_2026_10452_MOESM3_ESM.xlsx	7036608	d9b5bddd670cfd90ec2e60c7a28e8067eba8db5bd1a3f011959f4c4ab46cc76f
