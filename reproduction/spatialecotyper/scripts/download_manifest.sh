@@ -12,6 +12,19 @@ checksums_tmp="$checksums.part"
 
 [[ -s "$manifest" ]]
 mkdir -p "$raw_dir" "$header_dir"
+
+if [[ -e "$downloaded" || -e "$checksums" ]]; then
+  [[ -s "$downloaded" && -s "$checksums" ]] || {
+    echo "tutorial archive baseline is incomplete; refusing to regenerate it" >&2
+    exit 1
+  }
+  [[ $(( $(wc -l < "$downloaded") - 1 )) -eq 21 ]]
+  [[ $(wc -l < "$checksums") -eq 21 ]]
+  sha256sum --check "$checksums"
+  printf 'official tutorial archive baseline: PASS (locked, 21 files)\n'
+  exit 0
+fi
+
 printf 'file\turl\tused_by\tsource_commit\tetag\tbytes\tsha256\tlast_modified\tdownloaded_utc\n' \
   > "$metadata_tmp"
 : > "$checksums_tmp"

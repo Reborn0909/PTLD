@@ -38,7 +38,12 @@ run_ptld_by_sample <- function(normdata, metadata, output_dir,
   if (!identical(colnames(normdata), rownames(metadata))) {
     stop("normdata columns and metadata rows must be identically ordered")
   }
-  sample_ids <- unique(trimws(as.character(metadata$SampleID)))
+  original_sample_ids <- as.character(metadata$SampleID)
+  cleaned_sample_ids <- trimws(original_sample_ids)
+  if (!identical(original_sample_ids, cleaned_sample_ids)) {
+    stop("SampleID values must not have leading or trailing whitespace")
+  }
+  sample_ids <- unique(cleaned_sample_ids)
   if (anyNA(sample_ids) || any(!nzchar(sample_ids)) ||
       any(!grepl("^[A-Za-z0-9._-]+$", sample_ids))) {
     stop("SampleID values must be de-identified filename-safe tokens")

@@ -24,6 +24,34 @@ log() {
   printf '%s\t%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*" | tee -a "$log_path"
 }
 
+if [[ -e "$sha_path" || -e "$members_path" || -e "$metadata_path" ]]; then
+  test -s "$tar_path"
+  test -s "$filelist_path"
+  test -s "$sha_path"
+  test -s "$members_path"
+  test -s "$metadata_path"
+
+  expected_size=$(awk -F '\t' -v target="$tar_name" \
+    '$1 == "Archive" && $2 == target { print $4; exit }' "$filelist_path")
+  test "$expected_size" = "$(stat -c %s "$tar_path")"
+  (
+    cd "$raw_dir"
+    sha256sum --check "$sha_path"
+  )
+
+  expected_filelist_sha=$(awk -F '\t' -v target="$filelist_name" \
+    'NR > 1 && $1 == target { print $4; exit }' "$metadata_path")
+  test -n "$expected_filelist_sha"
+  test "$expected_filelist_sha" = "$(sha256sum "$filelist_path" | awk '{ print $1 }')"
+
+  locked_members=$(mktemp)
+  trap 'rm -f -- "$locked_members"' EXIT
+  tar -tf "$tar_path" > "$locked_members"
+  cmp -s "$locked_members" "$members_path"
+  log "GSE320042 archive baseline: PASS (locked)"
+  exit 0
+fi
+
 download_atomic() {
   local url=$1
   local destination=$2

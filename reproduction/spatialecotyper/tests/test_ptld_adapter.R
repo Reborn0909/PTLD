@@ -197,6 +197,13 @@ expect_error(
 )
 stopifnot(!dir.exists(unsafe_output))
 
+spaced_sample <- metadata
+spaced_sample$SampleID[[1]] <- " PTLD01 "
+expect_error(
+  run_ptld_by_sample(counts, spaced_sample, tempfile("ptld-spaced-sample-")),
+  "whitespace"
+)
+
 local({
   calls <- list()
   official_runner <- run_ptld_spatialecotyper
