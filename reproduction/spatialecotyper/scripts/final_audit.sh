@@ -39,6 +39,12 @@ audit_body() {
   bash reproduction/spatialecotyper/tests/test_layout.sh
   bash reproduction/spatialecotyper/tests/test_tutorial_archive.sh
   bash reproduction/spatialecotyper/tests/test_gse320042_archive.sh
+  bash reproduction/spatialecotyper/tests/test_paper_download_archive.sh
+  python3 reproduction/spatialecotyper/tests/test_paper_source_lock.py
+  python3 reproduction/spatialecotyper/tests/test_paper_data_manifest.py
+  python3 reproduction/spatialecotyper/tests/test_paper_download_resolution.py
+  python3 reproduction/spatialecotyper/tests/test_paper_file_validation.py
+  python3 reproduction/spatialecotyper/tests/test_paper_sample_validation.py
 
   test -s "$activation_file"
   mamba_root=$(awk -F= '$1 == "MAMBA_ROOT_PREFIX" { print $2; exit }' "$activation_file")
@@ -59,6 +65,20 @@ audit_body() {
   run_r_test reproduction/spatialecotyper/tests/test_tutorial_runs.R
   run_r_test reproduction/spatialecotyper/tests/test_reproducibility_matrix.R
   run_r_test reproduction/spatialecotyper/tests/test_ptld_adapter.R
+  run_r_test reproduction/spatialecotyper/tests/test_paper_inputs.R
+  run_r_test reproduction/spatialecotyper/tests/test_gse_object_audit.R
+  run_r_test reproduction/spatialecotyper/tests/test_paper_reproduction.R
+  run_r_test reproduction/spatialecotyper/tests/test_compare_paper_outputs.R
+
+  file_validation="$data_root/results/reproducibility/paper-file-validation.tsv"
+  sample_comparison="$data_root/results/paper_reproduction/generated_visium_deconvolution/supplementary-table-s17-comparison.tsv"
+  test -s "$file_validation"
+  test -s "$sample_comparison"
+  awk -F '\t' 'NR == 1 { for (i=1; i<=NF; i++) if ($i == "validation_status") c=i; next }
+    $c != "PASS" { failed += 1 } END { if (!c || failed) exit 1 }' "$file_validation"
+  awk -F '\t' 'NR == 1 { for (i=1; i<=NF; i++) if ($i == "comparison_status") c=i; next }
+    $c != "PASS" { failed += 1 } END { if (!c || NR != 18 || failed) exit 1 }' "$sample_comparison"
+  pass "paper file integrity and Supplementary Table 17 sample counts"
 
   matrix_path="$data_root/results/reproducibility/paper-computation-matrix.tsv"
   test -s "$matrix_path"
@@ -84,8 +104,8 @@ audit_body() {
   done
   pass "F-drive layer byte inventory"
 
-  test -z "$(find "$data_root/raw" "$data_root/archive" -type f -name '*.part' -print -quit)"
-  pass "no partial files in raw or archive"
+  test -z "$(find "$data_root/raw" "$data_root/archive" -type f \( -name '*.part' -o -name '*.aria2' \) -print -quit)"
+  pass "no partial or aria2 control files in raw or archive"
 
   printf 'FINAL_AUDIT\tPASS\n'
 }
