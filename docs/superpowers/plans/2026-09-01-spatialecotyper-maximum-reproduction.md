@@ -233,27 +233,29 @@ git commit -m "repro: run all eligible official paper analyses"
 - Consumes: official GitHub repository metadata, Nature data/code availability URLs and Stanford DOI metadata.
 - Produces: immutable observations with URL, HTTP status, ETag/commit, observed UTC, artifact type and whether it changes a current blocker.
 
-- [ ] **Step 1: Write mocked API and idempotency tests**
+- [x] **Step 1: Write mocked API and idempotency tests**
 
 Assert identical observations do not create duplicate snapshots; a new official commit is archived separately and never silently replaces the fixed paper commit; authentication pages remain `REGISTRATION_REQUIRED`.
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 Run: `python reproduction/spatialecotyper/tests/test_official_material_probe.py`
 
 Expected: FAIL because the probe does not exist.
 
-- [ ] **Step 3: Implement read-only official endpoint probes**
+- [x] **Step 3: Implement read-only official endpoint probes**
 
 Use conditional HTTP requests and GitHub commit/release APIs. Record discovery of Python files, checkpoints, CytoSPACE weights or figure scripts as candidate unblockers, but require local archive and validation before changing a panel status.
 
-- [ ] **Step 4: Run once and archive the baseline observation**
+- [x] **Step 4: Run once and archive the baseline observation**
 
 Run: `python reproduction/spatialecotyper/scripts/probe_official_material_updates.py --root /mnt/f/spatialecotyper_reproduction`
 
 Expected: one current snapshot per official endpoint and a report explicitly stating whether any of the three `BLOCKED_CODE` components changed.
 
-- [ ] **Step 5: Commit**
+Observed on 2026-09-01: official `main` was `57d37cd2c31c2b0743a7d50e036c4d4a50b61eee`, newer than the fixed paper commit. Its 100,908,873-byte source archive was stored separately with SHA-256 `2d5b8ed327cee5b141b354962546bdc182d85917feae250c6c5e1e092d0506ef`; none of the three blocker classes gained a candidate file.
+
+- [x] **Step 5: Commit**
 
 ```bash
 git add reproduction/spatialecotyper/scripts/probe_official_material_updates.py reproduction/spatialecotyper/tests/test_official_material_probe.py
