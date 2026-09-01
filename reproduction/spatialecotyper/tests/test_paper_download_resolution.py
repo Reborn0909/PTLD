@@ -81,6 +81,18 @@ class PaperDownloadResolutionTest(unittest.TestCase):
         self.assertEqual(987654321, module.content_range_total("bytes 0-0/987654321"))
         self.assertEqual(0, module.content_range_total(""))
 
+    def test_s3_etag_classification_identifies_8m_multipart_checksum(self):
+        module = load_module()
+        checksum_type, checksum = module.classify_s3_etag(
+            15886623172, '"1004f1244bd469bfa13f97bb7de15d07-1894"'
+        )
+        self.assertEqual("s3_multipart_etag_8m", checksum_type)
+        self.assertEqual("1004f1244bd469bfa13f97bb7de15d07-1894", checksum)
+        self.assertEqual(
+            ("md5", "0123456789abcdef0123456789abcdef"),
+            module.classify_s3_etag(100, '"0123456789abcdef0123456789abcdef"'),
+        )
+
     def test_capacity_total_deduplicates_download_urls(self):
         module = load_module()
         rows = [

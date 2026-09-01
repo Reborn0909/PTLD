@@ -131,6 +131,20 @@ def content_range_total(value: str) -> int:
     return int(match.group(1)) if match else 0
 
 
+def classify_s3_etag(size_bytes: int, etag: str) -> tuple:
+    checksum = (etag or "").strip().strip('"').lower()
+    simple = re.fullmatch(r"[0-9a-f]{32}", checksum)
+    if simple:
+        return "md5", checksum
+    multipart = re.fullmatch(r"[0-9a-f]{32}-(\d+)", checksum)
+    if multipart:
+        parts = int(multipart.group(1))
+        if size_bytes > 0 and (size_bytes + 8 * 1024 ** 2 - 1) // (8 * 1024 ** 2) == parts:
+            return "s3_multipart_etag_8m", checksum
+        return "s3_multipart_etag", checksum
+    return "", ""
+
+
 def http_metadata(url: str, method: str = "HEAD", headers=None, attempts: int = 2, timeout: int = 20) -> tuple:
     request_headers = {"User-Agent": USER_AGENT, **(headers or {})}
     last_error = None
@@ -196,13 +210,23 @@ def probe_size(url: str) -> int:
         headers, _, _ = http_metadata(url, method="HEAD")
         if headers.get("Content-Length"):
             return int(headers["Content-Length"])
-    except (HTTPError, URLError, TimeoutError):
+    except (HTTPError, URLError, TimeoutError, ConnectionError):
         pass
     try:
         headers, _, _ = http_metadata(url, method="GET", headers={"Range": "bytes=0-0"})
         return content_range_total(headers.get("Content-Range", ""))
-    except (HTTPError, URLError, TimeoutError):
+    except (HTTPError, URLError, TimeoutError, ConnectionError):
         return 0
+
+
+def probe_object_metadata(url: str) -> dict:
+    try:
+        headers, _, _ = http_metadata(url, method="HEAD")
+        size = int(headers.get("Content-Length", 0) or 0)
+        checksum_type, checksum = classify_s3_etag(size, headers.get("ETag", ""))
+        return {"size_bytes": size, "checksum_type": checksum_type, "checksum": checksum}
+    except (HTTPError, URLError, TimeoutError, ConnectionError):
+        return {"size_bytes": probe_size(url), "checksum_type": "", "checksum": ""}
 
 
 def resolve_geo(accession: str) -> list:
@@ -308,9 +332,11 @@ def resolve_tenx_samples(rows: list) -> list:
     for row in rows:
         for suffix in row["required_files"].split(";"):
             url = tenx_url(row, suffix)
+            metadata = probe_object_metadata(url)
             files.append({
                 "file_name": f"{row['paper_sample_id']}__{suffix}", "download_url": url,
-                "size_bytes": probe_size(url), "checksum_type": "", "checksum": "",
+                "size_bytes": metadata["size_bytes"],
+                "checksum_type": metadata["checksum_type"], "checksum": metadata["checksum"],
                 "paper_sample_id": row["paper_sample_id"],
             })
     return files
