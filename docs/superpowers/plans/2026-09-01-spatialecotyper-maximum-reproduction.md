@@ -154,27 +154,27 @@ git commit -m "repro: classify paper dataset computation readiness"
 - Consumes: `paper-panels.tsv`, dataset readiness, `paper-computation-inventory.tsv`, supplementary tables and fixed official source inventory.
 - Produces: exactly one audit row per extracted panel with `input_records`, `official_entrypoint`, `expected_output`, `observed_output`, `status`, and `limitation`.
 
-- [ ] **Step 1: Write coverage and status tests**
+- [x] **Step 1: Write coverage and status tests**
 
 Assert that no panel is missing or duplicated and only `STRICT_PASS`, `OFFICIAL_API_PASS`, `TUTORIAL_REPRODUCED`, `METHOD_ONLY`, `METHOD_GAP`, `BLOCKED_ACCESS`, or `BLOCKED_CODE` are accepted. `STRICT_PASS` must point to an existing observed-output file and a callable official entry point.
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 Run: `python reproduction/spatialecotyper/tests/test_paper_panel_reproduction.py`
 
 Expected: FAIL because the panel mapping is absent.
 
-- [ ] **Step 3: Curate the mapping exclusively from captions, Methods and Supplementary Tables 1–28**
+- [x] **Step 3: Curate the mapping exclusively from captions, Methods and Supplementary Tables 1–28**
 
 Record figure-level diagrams as `METHOD_ONLY`; map generated tumour spatial panels to GSE320042 and `SpatialEcoTyper::DeconvoluteSE`; map Liquid EcoTyper panels to `BLOCKED_CODE`; map protected clinical cohorts to `BLOCKED_ACCESS`; do not infer an entry point that is not present in the fixed repository.
 
-- [ ] **Step 4: Generate the audit and verify full panel coverage**
+- [x] **Step 4: Generate the audit and verify full panel coverage**
 
 Run: `python reproduction/spatialecotyper/scripts/audit_paper_panels.py --root /mnt/f/spatialecotyper_reproduction`
 
 Expected: audit row count equals `paper-panels.tsv`; no empty `status` or `limitation` fields.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add reproduction/spatialecotyper/config/paper-panel-reproduction.tsv reproduction/spatialecotyper/scripts/audit_paper_panels.py reproduction/spatialecotyper/tests/test_paper_panel_reproduction.py
