@@ -45,6 +45,7 @@ audit_body() {
   python3 reproduction/spatialecotyper/tests/test_paper_download_resolution.py
   python3 reproduction/spatialecotyper/tests/test_paper_file_validation.py
   python3 reproduction/spatialecotyper/tests/test_paper_sample_validation.py
+  python3 reproduction/spatialecotyper/tests/test_paper_data_inventory.py
 
   test -s "$activation_file"
   mamba_root=$(awk -F= '$1 == "MAMBA_ROOT_PREFIX" { print $2; exit }' "$activation_file")
@@ -69,6 +70,10 @@ audit_body() {
   run_r_test reproduction/spatialecotyper/tests/test_gse_object_audit.R
   run_r_test reproduction/spatialecotyper/tests/test_paper_reproduction.R
   run_r_test reproduction/spatialecotyper/tests/test_compare_paper_outputs.R
+
+  python3 reproduction/spatialecotyper/scripts/write_paper_data_inventory.py \
+    --root "$data_root" \
+    --output docs/reproduction/spatialecotyper-paper-data-inventory.md
 
   file_validation="$data_root/results/reproducibility/paper-file-validation.tsv"
   sample_comparison="$data_root/results/paper_reproduction/generated_visium_deconvolution/supplementary-table-s17-comparison.tsv"
