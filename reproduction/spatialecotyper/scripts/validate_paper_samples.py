@@ -42,6 +42,7 @@ def build_sample_audit(samples: list, downloads: list, verified: list, skipped: 
                        ledger: list, tenx_rows: list) -> list:
     downloads_by_source = index_rows(downloads, "source_record_id")
     verified_by_source = index_rows(verified, "source_record_id")
+    verified_by_url = index_rows(verified, "download_url")
     skipped_by_source = index_rows(skipped, "source_record_id")
     ledger_by_source = {row.get("source_record_id", ""): row for row in ledger}
     tenx_by_sample = {row.get("paper_sample_id", ""): row for row in tenx_rows}
@@ -77,11 +78,31 @@ def build_sample_audit(samples: list, downloads: list, verified: list, skipped: 
             verified_rows = verified_by_source.get(download_source, [])
             skipped_rows = skipped_by_source.get(download_source, [])
 
+        direct_verified = verified_rows
+        verified_rows = []
+        for resolved in resolved_rows:
+            url = resolved.get("download_url", "")
+            candidates = verified_by_url.get(url, []) if url else []
+            if candidates:
+                verified_rows.append(candidates[0])
+                continue
+            file_name = resolved.get("file_name", "")
+            direct = next(
+                (row for row in direct_verified if row.get("file_name", "") == file_name),
+                None,
+            )
+            if direct:
+                verified_rows.append(direct)
+
         access = ledger_by_source.get(download_source, {})
         access_status = access.get("access_status", "UNRESOLVED")
         availability = access_availability(access_status)
         if not availability:
-            if not resolved_rows:
+            if (resolved_rows and len(skipped_rows) == len(resolved_rows) and
+                    all(row.get("reason") == "PAUSED_SOURCE_GATE"
+                        for row in skipped_rows)):
+                availability = "PAUSED_CAPACITY"
+            elif not resolved_rows:
                 availability = "UNRESOLVED_PUBLIC"
             elif len(verified_rows) == len(resolved_rows):
                 availability = "VERIFIED"

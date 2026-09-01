@@ -81,6 +81,58 @@ class PaperSampleValidationTest(unittest.TestCase):
         self.assertEqual(2, keyed[("Table S8", "VERIFIED")])
         self.assertEqual(1, keyed[("Table S8", "BLOCKED_ACCESS")])
 
+    def test_deduplicated_url_is_verified_for_every_citing_source(self):
+        module = load_module()
+        url = "https://example.org/shared.tar.gz"
+        samples = [{
+            "source_record_id": "TableS2-R8", "sheet": "Table S2",
+            "platform": "10x", "sample_id": "", "reported_sample_count": "1",
+            "cohort": "",
+        }]
+        downloads = [{
+            "source_record_id": "TableS2-R8", "file_name": "shared.tar.gz",
+            "download_url": url,
+        }]
+        verified = [{
+            "source_record_id": "TableS2-R6", "file_name": "shared.tar.gz",
+            "download_url": url,
+        }]
+        ledger = [{
+            "source_record_id": "TableS2-R8", "access_status": "PUBLIC_API",
+            "reason": "same accession cited by multiple rows",
+        }]
+
+        rows = module.build_sample_audit(
+            samples, downloads, verified, [], ledger, [],
+        )
+        self.assertEqual("VERIFIED", rows[0]["availability"])
+        self.assertEqual(1, rows[0]["resolved_files"])
+        self.assertEqual(1, rows[0]["verified_files"])
+
+    def test_capacity_gated_source_is_not_reported_as_download_pending(self):
+        module = load_module()
+        samples = [{
+            "source_record_id": "TableS15-R6", "sheet": "Table S15",
+            "platform": "", "sample_id": "", "reported_sample_count": "1",
+            "cohort": "",
+        }]
+        downloads = [{
+            "source_record_id": "TableS15-R6", "file_name": "raw.fastq.gz",
+            "download_url": "https://example.org/raw.fastq.gz",
+        }]
+        skipped = [{
+            "source_record_id": "TableS15-R6", "file_name": "raw.fastq.gz",
+            "reason": "PAUSED_SOURCE_GATE",
+        }]
+        ledger = [{
+            "source_record_id": "TableS15-R6", "access_status": "PUBLIC_API",
+            "reason": "capacity gated raw reads",
+        }]
+        rows = module.build_sample_audit(
+            samples, downloads, [], skipped, ledger, [],
+        )
+        self.assertEqual("PAUSED_CAPACITY", rows[0]["availability"])
+
 
 if __name__ == "__main__":
     unittest.main()
