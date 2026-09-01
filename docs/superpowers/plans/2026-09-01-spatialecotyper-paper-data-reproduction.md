@@ -104,7 +104,7 @@
 - Produce: `/mnt/f/spatialecotyper_reproduction/work/paper_inputs/`
 
 - [ ] **Step 1: 写输入契约测试**：只接受补充方法明确的矩阵、metadata、coordinates 和平台字段；禁止推测缺失标签。
-- [ ] **Step 2: 实现原文预处理接口**：Visium 使用 Space Ranger/Seurat 原文阈值，Visium HD 使用 16 µm bins 与 `<20 genes` 过滤；无法由公开材料确定的步骤停止在 `METHOD_GAP`。
+- [ ] **Step 2: 实现原文预处理接口**：Visium 使用 Space Ranger/Seurat 原文阈值；公开的 Visium HD 单细胞尺度验证数据使用 8 µm × 8 µm bins，而研究生成、用于患者肿瘤–血浆配对去卷积的 Visium HD 使用 16 µm bins；两者均过滤 `<20 detected genes` 或 `>10% mitochondrial` 的 bins。无法由公开材料确定的步骤停止在 `METHOD_GAP`。
 - [ ] **Step 3: 构建 discovery/reference/recovery 输入**：记录每一步输入文件 SHA、参数、软件版本、随机种子和输出维度。
 - [ ] **Step 4: 验证样本数与矩阵尺寸**：与 S1/S2/S8 和原文 Methods 交叉核对。
 - [ ] **Step 5: 提交**：`git commit -m "repro: prepare paper-derived Spatial EcoTyper inputs"`。
