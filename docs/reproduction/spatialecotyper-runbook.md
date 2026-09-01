@@ -40,6 +40,42 @@ MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
 
 bash reproduction/spatialecotyper/scripts/download_gse320042.sh
 
+python3 reproduction/spatialecotyper/scripts/archive_paper_sources.py \
+  --root /mnt/f/spatialecotyper_reproduction
+python3 reproduction/spatialecotyper/scripts/extract_paper_data_manifest.py \
+  --xlsx /mnt/f/spatialecotyper_reproduction/archive/paper/41586_2026_10452_MOESM3_ESM.xlsx \
+  --output /mnt/f/spatialecotyper_reproduction/archive/manifests
+python3 reproduction/spatialecotyper/scripts/resolve_paper_downloads.py \
+  --datasets /mnt/f/spatialecotyper_reproduction/archive/manifests/paper-datasets.tsv \
+  --root /mnt/f/spatialecotyper_reproduction
+bash reproduction/spatialecotyper/scripts/download_paper_data.sh \
+  --root /mnt/f/spatialecotyper_reproduction \
+  --phase all-actionable --jobs 4 --connections 16
+python3 reproduction/spatialecotyper/scripts/validate_paper_files.py \
+  --root /mnt/f/spatialecotyper_reproduction
+python3 reproduction/spatialecotyper/scripts/validate_paper_samples.py \
+  --root /mnt/f/spatialecotyper_reproduction
+
+MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
+  /home/reborn/.local/bin/micromamba run \
+  -p /home/reborn/.local/share/micromamba-spatialecotyper/envs/spatialecotyper-1.0.2 \
+  Rscript reproduction/spatialecotyper/scripts/prepare_paper_inputs.R
+
+MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
+  /home/reborn/.local/bin/micromamba run \
+  -p /home/reborn/.local/share/micromamba-spatialecotyper/envs/spatialecotyper-1.0.2 \
+  Rscript reproduction/spatialecotyper/scripts/audit_gse320042_objects.R
+
+MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
+  /home/reborn/.local/bin/micromamba run \
+  -p /home/reborn/.local/share/micromamba-spatialecotyper/envs/spatialecotyper-1.0.2 \
+  Rscript reproduction/spatialecotyper/scripts/run_paper_reproduction.R
+
+MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
+  /home/reborn/.local/bin/micromamba run \
+  -p /home/reborn/.local/share/micromamba-spatialecotyper/envs/spatialecotyper-1.0.2 \
+  Rscript reproduction/spatialecotyper/scripts/compare_paper_outputs.R
+
 MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
   /home/reborn/.local/bin/micromamba run \
   -p /home/reborn/.local/share/micromamba-spatialecotyper/envs/spatialecotyper-1.0.2 \
@@ -47,6 +83,10 @@ MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
 
 bash reproduction/spatialecotyper/scripts/final_audit.sh
 ```
+
+论文公开队列的下载范围由补充表和容量闸门共同决定。当前去重后为 69 个
+可操作文件，61,207,712,053 字节；两个 ENA 原始测序来源合计约 1.94 TB，
+因单来源超过 100 GB 闸门而暂停。注册、DUA 或受控数据不绕过权限。
 
 下载脚本均使用 `.part` 临时文件，成功后才原子改名。首次下载中网络中断后，
 重新执行同一命令即可断点续传。归档 SHA/成员基线一旦生成便不会静默覆盖；再次
@@ -139,7 +179,7 @@ PTLD 层只做输入验证、显式细胞类型映射和官方 API 调用，不�
 
 - `STRICT_REPRODUCED`：同一官方材料与固定环境可严格重算；当前为 0 项。
 - `TUTORIAL_REPRODUCED`：官方八个教程已成功运行；共 8 项。
-- `METHOD_ONLY`：方法和部分数据公开，但缺少论文级端到端脚本；共 7 项。
+- `METHOD_ONLY`：方法和部分数据公开，但缺少论文级端到端脚本；共 8 项。
 - `BLOCKED_NOT_PUBLIC`：缺少公开实现或权重，无法本地严格复现；共 3 项。
 
 三项公开材料阻断是完整论文作图流水线、Liquid EcoTyper 的 PyTorch 训练，以及
