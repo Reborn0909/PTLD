@@ -61,11 +61,11 @@
 - Produce: `/mnt/f/spatialecotyper_reproduction/archive/manifests/paper-downloads.tsv`
 - Produce: `/mnt/f/spatialecotyper_reproduction/results/reproducibility/paper-download-capacity.tsv`
 
-- [ ] **Step 1: 写解析器契约测试**：每个公开数据集必须得到直接文件 URL/API 文件列表或明确失败原因；未知大小不得自动进入批量下载。
-- [ ] **Step 2: 实现官方仓库解析器**：覆盖 Stanford DOI、NCBI GEO、Zenodo、Mendeley Data、10x Genomics、Vizgen、HRA/GSA 和补充表中的 GitHub/SpatialResearch 链接。
-- [ ] **Step 3: 仅做元数据探测**：HEAD/API 获取文件名、大小、校验值、许可证和访问状态，不下载大文件。
-- [ ] **Step 4: 容量审计**：记录逐来源与总字节数、F盘可用空间、是否通过 100 GB/70% 闸门；作者 processed/normalized 数据与 GSE320042 已归档内容优先。
-- [ ] **Step 5: 提交**：`git commit -m "data: resolve paper download inventory"`。
+- [x] **Step 1: 写解析器契约测试**：每个公开数据集必须得到直接文件 URL/API 文件列表或明确失败原因；未知大小不得自动进入批量下载。
+- [x] **Step 2: 实现官方仓库解析器**：覆盖 Stanford DOI、NCBI GEO、Zenodo、Mendeley Data、10x Genomics、Vizgen、HRA/GSA、ENA 和补充表中的 GitHub/SpatialResearch 链接；无公开文件 API 的来源写入明确阻塞证据。
+- [x] **Step 3: 仅做元数据探测**：HEAD/API 获取文件名、大小、校验值、许可证和访问状态，不下载大文件。
+- [x] **Step 4: 容量审计**：记录逐来源与总字节数、F盘可用空间、是否通过 100 GB/70% 闸门；约 1.94 TB ENA raw FASTQ 被来源闸门暂停，可执行下载量约 60.29 GB。
+- [x] **Step 5: 提交**：`git commit -m "data: resolve paper download inventory"`。
 
 ### Task 4: 下载作者生成数据与公开处理后数据
 
