@@ -274,7 +274,7 @@ git commit -m "repro: monitor official material release gaps"
 - Consumes: access ledger and panel audit.
 - Produces: grouped, non-duplicated requests for Stanford normalized data, CytoSPACE spot-cell weights, Liquid EcoTyper code/checkpoints and figure scripts; no message is sent automatically.
 
-- [ ] **Step 1: Write the request-evidence contract test**
+- [x] **Step 1: Write the request-evidence contract test**
 
 ```python
 assert {row["request_type"] for row in rows} == {
@@ -285,25 +285,25 @@ assert all(row["blocked_panel_ids"] and row["official_evidence"] for row in rows
 assert all("@" not in row["recipient"] for row in rows)
 ```
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 Run: `python reproduction/spatialecotyper/tests/test_access_request_evidence.py`
 
 Expected: FAIL because the evidence writer and request checklist do not exist.
 
-- [ ] **Step 3: Generate the evidence table and bilingual checklist**
+- [x] **Step 3: Generate the evidence table and bilingual checklist**
 
 Run: `python reproduction/spatialecotyper/scripts/write_access_request_evidence.py --root /mnt/f/spatialecotyper_reproduction --output docs/reproduction/spatialecotyper-access-request-checklist.md`
 
 The generated checklist must ask for exact file classes, versions and panel linkage; it must not invent an email address or claim that approval has been obtained.
 
-- [ ] **Step 4: Verify controlled-data boundaries**
+- [x] **Step 4: Verify controlled-data boundaries**
 
 Run: `python reproduction/spatialecotyper/tests/test_access_request_evidence.py`
 
 Expected: PASS and every GSA-Human/HTAN/registered cohort remains `BLOCKED_ACCESS` pending its own DUA/IRB process.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/reproduction/spatialecotyper-access-request-checklist.md reproduction/spatialecotyper/scripts/write_access_request_evidence.py reproduction/spatialecotyper/tests/test_access_request_evidence.py
