@@ -115,27 +115,27 @@ git commit -m "repro: index archived paper data without extraction"
 - Consumes: paper datasets, downloads, file validation, sample availability, archive members and access ledger.
 - Produces: one row per `source_record_id` with `expression_status`, `metadata_status`, `spatial_status`, `official_preprocessing_status`, `readiness_class`, and `blocking_evidence`.
 
-- [ ] **Step 1: Write classification tests**
+- [x] **Step 1: Write classification tests**
 
 Test all allowed classes: `READY_OFFICIAL_PROCESSED`, `READY_RAW_ONLY`, `PARTIAL_FILES`, `PAUSED_CAPACITY`, `BLOCKED_ACCESS`, `BLOCKED_NOT_PUBLIC`, and `METHOD_GAP`. Assert that registration or controlled rows can never become `READY_*` without a verified file manifest row.
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 Run: `python reproduction/spatialecotyper/tests/test_paper_dataset_readiness.py`
 
 Expected: FAIL because the classifier is absent.
 
-- [ ] **Step 3: Implement deterministic joins and conservative rules**
+- [x] **Step 3: Implement deterministic joins and conservative rules**
 
 Require verified expression plus metadata/coordinates for `READY_OFFICIAL_PROCESSED`; classify expression without complete paper preprocessing as `READY_RAW_ONLY`; carry access and capacity states directly from the ledger. Every non-ready row must contain a concrete URL, accession, missing role, or unpublished-method statement.
 
-- [ ] **Step 4: Generate the matrix and verify conservation**
+- [x] **Step 4: Generate the matrix and verify conservation**
 
 Run: `python reproduction/spatialecotyper/scripts/classify_paper_dataset_readiness.py --root /mnt/f/spatialecotyper_reproduction`
 
 Expected: every canonical `source_record_id` appears exactly once and the class counts sum to the input record count.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add reproduction/spatialecotyper/scripts/classify_paper_dataset_readiness.py reproduction/spatialecotyper/tests/test_paper_dataset_readiness.py
