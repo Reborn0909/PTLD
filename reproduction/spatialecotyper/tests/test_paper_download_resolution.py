@@ -103,6 +103,21 @@ class PaperDownloadResolutionTest(unittest.TestCase):
         self.assertEqual(30, module.deduplicated_known_bytes(rows))
         self.assertEqual(20, module.actionable_known_bytes(rows, {"A"}))
 
+    def test_github_archive_is_pinned_to_resolved_commit(self):
+        module = load_module()
+        record = module.github_archive_record(
+            "almaan", "her2st", "85df7411b987a7dec3feff9718b869a7a82091ec"
+        )
+        self.assertEqual(
+            "almaan-her2st-85df7411b987a7dec3feff9718b869a7a82091ec.zip",
+            record["file_name"],
+        )
+        self.assertEqual(
+            "https://codeload.github.com/almaan/her2st/zip/85df7411b987a7dec3feff9718b869a7a82091ec",
+            record["download_url"],
+        )
+        self.assertEqual(0, record["size_bytes"])
+
     def test_ena_report_parser_expands_paired_fastq_files(self):
         module = load_module()
         payload = ("run_accession\tfastq_ftp\tfastq_bytes\tfastq_md5\n"

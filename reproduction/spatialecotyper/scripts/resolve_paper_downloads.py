@@ -257,6 +257,14 @@ def resolve_zenodo(url: str) -> tuple:
     return parse_zenodo_record(payload)
 
 
+def github_archive_record(owner: str, repo: str, commit_sha: str) -> dict:
+    return {
+        "file_name": f"{owner}-{repo}-{commit_sha}.zip",
+        "download_url": f"https://codeload.github.com/{owner}/{repo}/zip/{commit_sha}",
+        "size_bytes": 0, "checksum_type": "", "checksum": "",
+    }
+
+
 def resolve_github(url: str) -> list:
     match = re.search(r"github\.com/([^/]+)/([^/#?]+)", url)
     if not match:
@@ -265,11 +273,13 @@ def resolve_github(url: str) -> list:
     payload, _, _, _ = http_bytes(f"https://api.github.com/repos/{owner}/{repo}")
     metadata = json.loads(payload.decode("utf-8"))
     branch = metadata["default_branch"]
-    return [{
-        "file_name": f"{owner}-{repo}-{branch}.zip",
-        "download_url": f"https://github.com/{owner}/{repo}/archive/refs/heads/{branch}.zip",
-        "size_bytes": 0, "checksum_type": "", "checksum": "",
-    }]
+    commit_payload, _, _, _ = http_bytes(
+        f"https://api.github.com/repos/{owner}/{repo}/commits/{branch}"
+    )
+    commit_sha = json.loads(commit_payload.decode("utf-8"))["sha"]
+    if not re.fullmatch(r"[0-9a-f]{40}", commit_sha):
+        raise ValueError(f"invalid GitHub commit SHA for {owner}/{repo}: {commit_sha}")
+    return [github_archive_record(owner, repo, commit_sha)]
 
 
 def resolve_direct_page(url: str) -> list:

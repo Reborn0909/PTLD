@@ -26,6 +26,7 @@ output_manifest="$root/archive/manifests/paper-file-sha256.tsv"
 skipped_manifest="$root/archive/manifests/paper-download-skipped.tsv"
 log_dir="$root/results/logs/paper-downloads"
 cache_dir="$root/cache"
+bounded_unknown_limit=$((100 * 1024 * 1024 * 1024))
 
 [[ -s "$manifest" && -s "$capacity" ]]
 [[ "$jobs" =~ ^[1-9][0-9]*$ ]]
@@ -105,8 +106,12 @@ while IFS=$'\034' read -r source accession repository filename url size checksum
     continue
   fi
   if [[ ! "$size" =~ ^[0-9]+$ ]] || (( size == 0 )); then
-    printf '%s\t%s\tUNKNOWN_SIZE\t%s\t%s\n' "$source" "$accession" "$filename" "$url" >> "$skipped_manifest.part"
-    continue
+    if [[ "$repository" == GITHUB && -n "$url" ]]; then
+      size=0
+    else
+      printf '%s\t%s\tUNKNOWN_SIZE\t%s\t%s\n' "$source" "$accession" "$filename" "$url" >> "$skipped_manifest.part"
+      continue
+    fi
   fi
   if [[ -n "${seen_url[$url]:-}" ]]; then
     continue
@@ -132,12 +137,19 @@ download_one() {
   local log="$log_dir/${item_index}-${repository}.log"
   mkdir -p "$(dirname "$destination")"
   local status=VERIFIED_EXISTING
+  local bounded_unknown=0
+  if [[ "$repository" == GITHUB && "$expected_size" == 0 ]]; then
+    bounded_unknown=1
+  fi
 
   if [[ -e "$destination" ]]; then
     [[ -f "$destination" ]]
     local existing_size
     existing_size=$(stat -c %s "$destination")
-    if [[ "$existing_size" != "$expected_size" ]]; then
+    if (( bounded_unknown )); then
+      (( existing_size > 0 && existing_size <= bounded_unknown_limit ))
+      expected_size=$existing_size
+    elif [[ "$existing_size" != "$expected_size" ]]; then
       echo "existing size mismatch: $destination expected=$expected_size actual=$existing_size" >&2
       return 1
     fi
@@ -148,7 +160,12 @@ download_one() {
       local offset=0
       [[ -f "$part" ]] && offset=$(stat -c %s "$part")
       printf '%s attempt=%s offset=%s url=%s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$attempt" "$offset" "$url" >> "$log"
-      if [[ "$url" =~ ^https?:// ]] && command -v aria2c >/dev/null 2>&1; then
+      if (( bounded_unknown )) && [[ "$url" =~ ^https?:// ]]; then
+        if curl --fail --location --retry 3 --retry-all-errors \
+            --max-filesize "$bounded_unknown_limit" --output "$part" "$url" >> "$log" 2>&1; then
+          break
+        fi
+      elif [[ "$url" =~ ^https?:// ]] && command -v aria2c >/dev/null 2>&1; then
         if aria2c --continue=true --auto-file-renaming=false --allow-overwrite=true \
             --max-connection-per-server="$connections" --split="$connections" --min-split-size=1M \
             --file-allocation=none --max-tries=4 --retry-wait=5 --timeout=60 \
@@ -170,7 +187,10 @@ download_one() {
     [[ -f "$part" ]]
     local observed_part
     observed_part=$(stat -c %s "$part")
-    if [[ "$observed_part" != "$expected_size" ]]; then
+    if (( bounded_unknown )); then
+      (( observed_part > 0 && observed_part <= bounded_unknown_limit ))
+      expected_size=$observed_part
+    elif [[ "$observed_part" != "$expected_size" ]]; then
       echo "downloaded size mismatch: $part expected=$expected_size actual=$observed_part" >&2
       return 1
     fi

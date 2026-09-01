@@ -10,6 +10,7 @@ trap 'rm -rf -- "$tmp"' EXIT
 mkdir -p "$tmp/archive/manifests" "$tmp/results/reproducibility" "$tmp/source"
 printf 'abc' > "$tmp/source/a.bin"
 printf 'pause' > "$tmp/source/paused.bin"
+printf 'zip' > "$tmp/source/unknown.zip"
 size_a=$(stat -c %s "$tmp/source/a.bin")
 size_paused=$(stat -c %s "$tmp/source/paused.bin")
 
@@ -18,7 +19,7 @@ size_paused=$(stat -c %s "$tmp/source/paused.bin")
   printf 'A\t\tTENX\tSample__a.bin\tfile://%s\t%s\t\t\t\tPUBLIC_API\ttest\n' "$tmp/source/a.bin" "$size_a"
   printf 'B\t\tTENX\tDuplicate__a.bin\tfile://%s\t%s\t\t\t\tPUBLIC_API\ttest duplicate\n' "$tmp/source/a.bin" "$size_a"
   printf 'C\tPRJEB1\tENA\tpaused.bin\tfile://%s\t%s\t\t\t\tPUBLIC_API\tpaused\n' "$tmp/source/paused.bin" "$size_paused"
-  printf 'D\t\tGITHUB\tunknown.zip\tfile://%s\t0\t\t\t\tPUBLIC_API\tunknown\n' "$tmp/source/a.bin"
+  printf 'D\t\tGITHUB\tunknown.zip\tfile://%s\t0\t\t\t\tPUBLIC_API\tbounded unknown\n' "$tmp/source/unknown.zip"
 } > "$tmp/archive/manifests/paper-downloads.tsv"
 
 {
@@ -36,15 +37,16 @@ skipped="$tmp/archive/manifests/paper-download-skipped.tsv"
 test -s "$manifest"
 test -s "$skipped"
 grep -Fq $'expected_checksum\tchecksum_type\tsha256' "$manifest"
-test "$(( $(wc -l < "$manifest") - 1 ))" -eq 1
-test "$(( $(wc -l < "$skipped") - 1 ))" -eq 2
+test "$(( $(wc -l < "$manifest") - 1 ))" -eq 2
+test "$(( $(wc -l < "$skipped") - 1 ))" -eq 1
 path=$(awk -F '\t' 'NR == 2 { print $11 }' "$manifest")
 test -s "$path"
 test "$(stat -c %s "$path")" -eq 3
 expected=$(sha256sum "$tmp/source/a.bin" | awk '{ print $1 }')
 test "$(awk -F '\t' 'NR == 2 { print $10 }' "$manifest")" = "$expected"
 grep -Fq $'C\tPRJEB1\tPAUSED_SOURCE_GATE' "$skipped"
-grep -Fq $'D\t\tUNKNOWN_SIZE' "$skipped"
+test "$(awk -F '\t' '$1 == "D" { print $7 }' "$manifest")" -eq 3
+test "$(awk -F '\t' '$1 == "D" { print $6 }' "$manifest")" -eq 3
 
 if "$script" --root "$tmp" --phase all-actionable --jobs 1 --connections 17 \
     >/dev/null 2>&1; then
