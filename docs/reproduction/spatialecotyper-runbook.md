@@ -84,6 +84,19 @@ MAMBA_ROOT_PREFIX=/home/reborn/.local/share/micromamba-spatialecotyper \
 bash reproduction/spatialecotyper/scripts/final_audit.sh
 ```
 
+上述全流程也可在 Windows PowerShell 中以隐藏后台进程执行；它会持续运行到下载、
+文件验证、计算复核和最终审计全部结束：
+
+```powershell
+& .\reproduction\spatialecotyper\scripts\launch_paper_reproduction.ps1
+Get-Content F:\spatialecotyper_reproduction\results\reproducibility\paper-completion-status.tsv
+Get-Content F:\spatialecotyper_reproduction\results\logs\paper-completion.stdout.log -Tail 30
+Get-Content F:\spatialecotyper_reproduction\results\logs\paper-completion.stderr.log -Tail 30
+```
+
+`paper-completion-status.tsv` 只有在最终审计通过后才会写入 `PASS`；任何中间失败均写入
+`FAIL`、最后完成步骤和退出码。
+
 论文公开队列的下载范围由补充表和容量闸门共同决定。当前去重后为 69 个
 可操作文件，61,207,712,053 字节；两个 ENA 原始测序来源合计约 1.94 TB，
 因单来源超过 100 GB 闸门而暂停。注册、DUA 或受控数据不绕过权限。
