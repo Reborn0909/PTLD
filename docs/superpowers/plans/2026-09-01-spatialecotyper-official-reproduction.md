@@ -4,7 +4,7 @@
 
 **Goal:** 在 WSL2 中建立版本固定、可审计的 Spatial EcoTyper 官方复现环境，归档 21 个教程文件和 GSE320042，依次运行 8 个官方教程，界定论文计算的严格复现边界，最后仅增加 PTLD 输入、QC 与调用接口适配层。
 
-**Architecture:** 代码与小型清单保存在当前 Git 项目；大型数据、包缓存、中间文件和结果统一保存在 `F:\spatialecotyper_reproduction`。官方算法固定到论文日提交 `48c2c846781d3a312771021c1a2ef5fc383700c5`（SpatialEcoTyper 1.0.2），8 个官方 Rmd 保持只读；包装脚本只管理环境、下载、路径、执行顺序、日志和验证，不修改 Spatial EcoTyper 函数。
+**Architecture:** 代码与小型清单保存在当前 Git 项目；大型数据、下载缓存、中间文件和结果统一保存在 `F:\spatialecotyper_reproduction`。R环境本体保存在WSL的Linux文件系统，避免在NTFS挂载上使用conda硬链接。官方算法固定到论文日提交 `48c2c846781d3a312771021c1a2ef5fc383700c5`（SpatialEcoTyper 1.0.2），8 个官方 Rmd 保持只读；包装脚本只管理环境、下载、路径、执行顺序、日志和验证，不修改 Spatial EcoTyper 函数。
 
 **Tech Stack:** Windows 11、WSL2 Ubuntu 24.04、micromamba、R 4.4.1、renv、SpatialEcoTyper 1.0.2、Seurat 5.1.0、Matrix 1.7-0、NMF 0.28、Bash、Rscript、SHA-256。
 
@@ -19,7 +19,7 @@
 - GSE320042 只从 NCBI GEO 官方目录下载：`https://ftp.ncbi.nlm.nih.gov/geo/series/GSE320nnn/GSE320042/suppl/`。
 - 严格复现、教程级复现、方法级复现和不可复现必须分开标记；不得把缺失的 Liquid EcoTyper PyTorch、论文完整作图脚本或未公开预处理代码标为已复现。
 - PTLD 阶段只允许输入格式、QC、细胞类型映射、批量调用和结果整理；不得修改 `R/` 下的官方算法。
-- 当前官方材料没有提供 `renv.lock`；环境采用官方 HTML `sessionInfo()` 重建并显式记录这一证据缺口。
+- 当前官方材料没有提供 `renv.lock`；环境采用官方 HTML `sessionInfo()` 重建并显式记录这一证据缺口。`presto 1.0.0` 固定到其官方标签提交 `7636b3d0465c468c35853f82f1717d3a64b3c8f6`。
 
 ---
 
@@ -159,7 +159,7 @@ mkdir -p \
 
 - [ ] **Step 4: 创建官方推荐的 Conda 路线环境**
 
-`environment.yml` 固定核心版本：
+`environment.yml` 固定当前conda索引仍可直接解析的二进制核心版本；官方记录但已从当前conda索引移除的 `Matrix 1.7-0`、`NMF 0.28`、`data.table 1.16.0`、`ComplexHeatmap 2.20.0` 和 `glmGamPoi 1.16.0` 由后续R脚本从官方CRAN/Bioconductor源安装：
 
 ```yaml
 name: spatialecotyper-1.0.2
@@ -169,10 +169,6 @@ channels:
 dependencies:
   - r-base=4.4.1
   - r-seurat=5.1.0
-  - r-matrix=1.7_0
-  - r-nmf=0.28
-  - bioconductor-complexheatmap=2.20.0
-  - r-data.table=1.16.0
   - r-hdf5r=1.3.11
   - r-remotes
   - r-renv
@@ -199,7 +195,7 @@ writeLines(capture.output(sessionInfo()),
            "/mnt/f/spatialecotyper_reproduction/results/environment/sessionInfo.txt")
 ```
 
-同时生成 `explicit-conda-spec.txt`、`installed-packages.tsv` 和 `renv.lock`。`presto` 只有版本号而无论文日提交证据时，必须在环境报告中标为 `source_commit_unresolved`。
+同时生成 `explicit-conda-spec.txt`、`installed-packages.tsv` 和 `renv.lock`。`presto` 使用官方 `1.0.0` 标签提交 `7636b3d0465c468c35853f82f1717d3a64b3c8f6`。
 
 - [ ] **Step 6: 验证环境**
 
@@ -530,5 +526,4 @@ git commit -m "docs: add audited Spatial EcoTyper reproduction runbook"
 - Spec coverage: WSL独立环境、F盘五层目录、21文件与SHA、8教程、GSE320042、论文复现边界、PTLD薄适配均有独立任务和验收。
 - Completeness scan: 每个任务都有具体文件、命令、预期结果和提交点，不含待补内容。
 - Type consistency: 教程顺序由同一个 `tutorial-order.tsv` 驱动；下载清单由同一个抽取脚本产生；所有路径统一使用 `/mnt/f/spatialecotyper_reproduction`。
-- Known evidence gap: 官方未提供 `renv.lock`，且 `presto 1.0.0` 的论文日Git SHA不能由 `sessionInfo()`恢复；计划要求显式记录而非伪造严格一致。
-
+- Known evidence gap: 官方未提供 `renv.lock`；虽然 `presto 1.0.0` 可固定到官方标签SHA，但仍不能证明作者构建教程时使用的就是该标签提交。计划要求显式记录而非伪造严格一致。
